@@ -2,6 +2,8 @@
 import Base from '../layouts/Base.astro';
 import Pic from '../components/Pic.astro';
 import ProcessSpine from '../components/ProcessSpine.astro';
+import ReachMap from '../components/ReachMap.astro';
+import heroWide from '../assets/gen/hero-wide.png';
 import Faq from '../components/Faq.astro';
 import EnquiryCta from '../components/EnquiryCta.astro';
 import { site, testimonials, aboutParagraphs } from '../data/site';
@@ -22,8 +24,8 @@ const lead = testimonials[0];
   <section class="hero">
     <Pic
       class="hero__img"
-      src={photo('karin-working')}
-      alt="Karin adjusting a bride's veil on a clifftop terrace above the lake"
+      src={heroWide}
+      alt="Karin releasing a bride's veil into the wind on a terrace above Lake Bled"
       widths={[720, 1200, 1800]}
       sizes="100vw"
       priority
@@ -57,6 +59,7 @@ const lead = testimonials[0];
   </section>
 
   <ProcessSpine />
+  <ReachMap />
 
   <!-- ── Services ────────────────────────────────────────────────────── -->
   <section class="section services" id="services">

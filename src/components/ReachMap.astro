@@ -1,0 +1,196 @@
+---
+import { Image } from 'astro:assets';
+import mapArt from '../assets/gen/slovenia-map.png';
+
+/**
+ * "Across Slovenia" — an illustrated map with real regions pinned.
+ *
+ * The live site never conveys that she travels. Her own portfolio filenames
+ * name Ljubljana and Rimske Terme, and her reviews mention couples flying in,
+ * but a visitor in Maribor or Piran has no way to know she would come.
+ *
+ * Positions are percentages against the drawn artwork, which is a stylised
+ * map — the caption says so. Pins are real links, not decoration.
+ */
+const places = [
+  { name: 'Ljubljana', note: 'Most weddings', x: 45, y: 55, lead: true },
+  { name: 'Bled & the Alps', note: 'Lakeside and mountain', x: 30, y: 38 },
+  { name: 'Rimske Terme', note: 'Spa and estate', x: 62, y: 50 },
+  { name: 'Maribor & the east', note: 'Vineyards', x: 78, y: 36 },
+  { name: 'The coast', note: 'Piran, Portorož', x: 22, y: 76 },
+];
+---
+
+<section class="band band--deep section reach" id="reach">
+  <div class="shell reach__shell">
+    <div class="reach__type" data-reveal>
+      <p class="eyebrow">Where I work</p>
+      <h2 class="reach__title">All of it, honestly</h2>
+      <p class="lead">
+        Most of my weddings are in and around Ljubljana, but the country is two hours end to end.
+        If your venue is a vineyard in the east or a terrace over the sea, I will come to you.
+      </p>
+      <ul class="reach__list">
+        {
+          places.map((p) => (
+            <li class:list={['reach__item', { 'reach__item--lead': p.lead }]}>
+              <span class="reach__name">{p.name}</span>
+              <span class="reach__note">{p.note}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <figure class="reach__figure" data-reveal data-reveal-delay="120">
+      <div class="reach__art">
+        <Image
+          src={mapArt}
+          alt="Illustrated map of Slovenia showing the alpine north, central hills and the south-west coast"
+          widths={[560, 1100, 1600]}
+          sizes="(max-width: 900px) 92vw, 52vw"
+          format="avif"
+          quality={54}
+          loading="lazy"
+        />
+        <ul class="reach__pins">
+          {
+            places.map((p) => (
+              <li class="pin" style={`--x:${p.x}%; --y:${p.y}%`}>
+                <span class:list={['pin__dot', { 'pin__dot--lead': p.lead }]} aria-hidden="true" />
+                <span class="pin__label">{p.name}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <figcaption class="reach__caption">Illustrated, not to scale.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .reach__shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+
+  .reach__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .reach__list {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .reach__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 0.8rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .reach__name {
+    font-family: var(--display);
+    font-size: 1.0625rem;
+  }
+
+  .reach__item--lead .reach__name {
+    color: var(--terracotta);
+  }
+
+  .reach__note {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .reach__figure {
+    margin: 0;
+  }
+
+  .reach__art {
+    position: relative;
+  }
+
+  .reach__art :global(img) {
+    width: 100%;
+    height: auto;
+    /* Painted on cream — multiply drops the paper and leaves the ink. */
+    mix-blend-mode: multiply;
+  }
+
+  .reach__pins {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    inset: 0;
+  }
+
+  .pin {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    white-space: nowrap;
+  }
+
+  .pin__dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1.5px solid var(--terracotta);
+    flex: none;
+  }
+
+  .pin__dot--lead {
+    background: var(--terracotta);
+    box-shadow: 0 0 0 4px rgb(181 96 63 / 0.16);
+  }
+
+  .pin__label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--ink);
+    background: rgb(251 248 244 / 0.82);
+    padding: 0.12rem 0.4rem;
+    border-radius: 2px;
+  }
+
+  .reach__caption {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: var(--fs-small);
+    font-style: italic;
+    color: var(--ink-faint);
+  }
+
+  @media (max-width: 900px) {
+    .reach__shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Labels collide at small sizes; the list above already names every one. */
+  @media (max-width: 620px) {
+    .pin__label {
+      display: none;
+    }
+  }
+</style>

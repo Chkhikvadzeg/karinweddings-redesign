@@ -11,6 +11,8 @@
  */
 export type Step = {
   id: string;
+  /** Spot illustration in public/icons/step-<id>.svg */
+  icon: string;
   when: string;
   title: string;
   body: string;
@@ -21,6 +23,7 @@ export type Step = {
 export const process: Step[] = [
   {
     id: 'first-call',
+    icon: 'step-first-call.png',
     when: '12–18 months out',
     title: 'The first call',
     body:
@@ -29,6 +32,7 @@ export const process: Step[] = [
   },
   {
     id: 'design',
+    icon: 'step-design.png',
     when: '10–12 months out',
     title: 'The shape of the day',
     body:
@@ -37,6 +41,7 @@ export const process: Step[] = [
   },
   {
     id: 'suppliers',
+    icon: 'step-suppliers.png',
     when: '6–10 months out',
     title: 'The team',
     body:
@@ -45,6 +50,7 @@ export const process: Step[] = [
   },
   {
     id: 'logistics',
+    icon: 'step-logistics.png',
     when: '2–6 months out',
     title: 'The unglamorous part',
     body:
@@ -53,6 +59,7 @@ export const process: Step[] = [
   },
   {
     id: 'the-day',
+    icon: 'step-the-day.png',
     when: 'The day',
     title: 'You are a guest at your own wedding',
     body:
@@ -61,6 +68,7 @@ export const process: Step[] = [
   },
   {
     id: 'after',
+    icon: 'step-after.png',
     when: 'The week after',
     title: 'Closing it out',
     body:

@@ -1,5 +1,6 @@
 ---
 import { process } from '../data/process';
+import { url } from '../lib/url';
 
 /**
  * The process spine.
@@ -32,6 +33,14 @@ import { process } from '../data/process';
           <div class="step__marker" aria-hidden="true">
             <span class="step__dot" />
           </div>
+          <img
+            class="step__icon"
+            src={url(`/icons/${step.icon}`)}
+            alt=""
+            width="52"
+            height="52"
+            loading="lazy"
+          />
           <p class="step__when">{step.when}</p>
           <h3 class="step__title">
             <span class="step__num">{String(i + 1).padStart(2, '0')}</span>
@@ -125,6 +134,13 @@ import { process } from '../data/process';
 
   .step:first-child .step__dot {
     background: var(--terracotta);
+  }
+
+  .step__icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 0.9rem;
+    opacity: 0.9;
   }
 
   .step__when {

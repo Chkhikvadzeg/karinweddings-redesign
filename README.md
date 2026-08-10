@@ -25,8 +25,8 @@ lazy loading, `encodedBodySize` summed across every resource plus the document.
 
 | | Live site | This demo |
 |---|---|---|
-| Homepage weight | **3,615 KB** | **62 KB** |
-| Requests | **90** | **13** |
+| Homepage weight | **3,615 KB** | **219 KB** |
+| Requests | **90** | **18** |
 | CSS files | **36** | 2 |
 | JS files | **22** (incl. jQuery 3.7.1) | 3 |
 | Photographs as CSS backgrounds | **5, totalling ~1.8 MB** | **0** |
@@ -57,11 +57,44 @@ until their images arrive. Same symptom, different fix.
 
 ---
 
+## Generated assets
+
+Four assets were generated with Higgsfield (Recraft V4.1). All are disclosed
+here and none is photographic:
+
+| Asset | What it is | Risk |
+|---|---|---|
+| `src/assets/gen/slovenia-map.png` | Ink-and-wash map for the "Where I work" section | None — unmistakably illustration |
+| `public/icons/step-*.png` | Six line-drawn spot illustrations for the process spine | None |
+| `public/og.jpg` | Share card — generated watercolour ground, her wordmark composited on with sharp | None |
+| `src/assets/gen/hero-wide.png` | **Her real photograph, outpainted** | **See below** |
+
+### The hero needs explaining
+
+Her photographs are all portrait 2:3. A full-bleed landscape hero crops away
+most of the frame, so the source photo — Karin releasing a bride's veil above
+Lake Bled — was **outpainted from 1707×2560 to 2752×1536**.
+
+**62.8% of that image is generated.** The people, the veil, the terrace and the
+lake were in the original and are untouched; the extended landscape either side
+is invented. It is not fabricated wedding photography — no person or event was
+invented — but it *is* a materially altered photograph.
+
+Acceptable for a demo with this disclosure. **Not acceptable to ship**: the
+photographer holds copyright, and publishing a 63%-synthetic version of their
+work is their call, not ours. The zero-alteration alternative is a split hero
+with the original portrait beside the type, which needs no generated pixels.
+
+No AI-generated wedding photography exists in this build, and none should. Her
+real photographs are visibly, specifically hers; a synthetic one placed beside
+them would look wrong even to someone who could not say why.
+
 ## What is here
 
 | Template | File | Generates |
 |---|---|---|
 | Home | `src/pages/index.astro` | 1 |
+| — includes the illustrated reach map (`ReachMap.astro`) | | |
 | Service | `src/pages/services/[slug].astro` | **4** from `src/data/services.ts` |
 | Case study | `src/pages/work/[slug].astro` | **3** from `src/data/work.ts` |
 | Enquiry | `src/pages/enquire.astro` | 1 |
@@ -82,6 +115,13 @@ couple has to do at each one. Usually almost nothing. That is the pitch.
 galleries labelled with couple names. A gallery says "here are some photos". A
 case study says "here is a problem like yours and what I did about it", which
 is what someone deciding whether to spend thousands actually needs.
+
+### Remaining weight
+
+Fonts are **115 KB of the 219 KB** — two variable families across the Latin and
+Latin-Extended subsets. Latin-Extended is not optional: `Lučka`, `Čemažar` and
+`Portorož` all need it. The icons were 63 KB as traced SVG and are 9 KB as 2×
+PNG, which is the right trade for artwork rendered at a fixed 52 px.
 
 ### Visual direction
 
