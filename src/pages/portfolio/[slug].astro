@@ -1,0 +1,250 @@
+---
+import Base from '../../layouts/Base.astro';
+import Pic from '../../components/Pic.astro';
+import EnquiryCta from '../../components/EnquiryCta.astro';
+import { galleries } from '../../data/galleries';
+import { work } from '../../data/work';
+import { photo } from '../../lib/images';
+import { url } from '../../lib/url';
+
+// One template, 24 galleries.
+export function getStaticPaths() {
+  return galleries.map((gallery) => ({ params: { slug: gallery.slug }, props: { gallery } }));
+}
+
+const { gallery } = Astro.props;
+const idx = galleries.findIndex((g) => g.slug === gallery.slug);
+const next = galleries[(idx + 1) % galleries.length];
+const prev = galleries[(idx - 1 + galleries.length) % galleries.length];
+
+// If a written case study exists for this gallery, link to it.
+const study = work.find((w) => w.gallerySlug === gallery.slug);
+---
+
+<Base
+  title={`${gallery.title} — ${gallery.kind} | Karin Weddings & Events`}
+  description={`${gallery.title}: a ${gallery.kind.toLowerCase()} planned by Karin Čemažar.`}
+  navOverlay
+>
+  <section class="ghero">
+    <Pic
+      class="ghero__img"
+      src={photo(gallery.cover)}
+      alt={`${gallery.title} — ${gallery.kind.toLowerCase()} planned by Karin`}
+      widths={[720, 1200, 1800]}
+      sizes="100vw"
+      priority
+    />
+    <div class="ghero__scrim"></div>
+    <div class="shell ghero__inner">
+      <p class="ghero__kind">{gallery.kind}</p>
+      <h1 class="ghero__title script">{gallery.title}</h1>
+    </div>
+  </section>
+
+  {
+    study && (
+      <section class="band band--clay studyline">
+        <div class="shell studyline__inner">
+          <p>There is a full write-up of how this one came together.</p>
+          <a class="btn" href={url(`/work/${study.slug}/`)}>Read the story</a>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section gal">
+    <div class="shell">
+      <div class="gal__grid">
+        {
+          gallery.photos.map((name, i) => (
+            <figure class:list={['gal__item', { 'gal__item--wide': i % 5 === 0 }]} data-reveal data-reveal-delay={(i % 4) * 70}>
+              <Pic
+                src={photo(name)}
+                alt={`${gallery.title}, photograph ${i + 1}`}
+                widths={[500, 1000]}
+                sizes="(max-width: 700px) 92vw, 46vw"
+              />
+            </figure>
+          ))
+        }
+      </div>
+      <p class="gal__note">
+        A selection. The full gallery lives on Karin’s site.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--deep section gnav">
+    <div class="shell gnav__inner">
+      <a class="gnav__link gnav__link--prev" href={url(`/portfolio/${prev.slug}/`)}>
+        <span class="gnav__label">Previous</span>
+        <span class="gnav__name">{prev.title}</span>
+      </a>
+      <a class="textlink gnav__all" href={url('/portfolio/')}>All {galleries.length} galleries</a>
+      <a class="gnav__link gnav__link--next" href={url(`/portfolio/${next.slug}/`)}>
+        <span class="gnav__label">Next</span>
+        <span class="gnav__name">{next.title}</span>
+      </a>
+    </div>
+  </section>
+
+  <EnquiryCta heading="Start with a date" />
+</Base>
+
+<style>
+  .ghero {
+    position: relative;
+    min-height: min(74svh, 640px);
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: clamp(2.5rem, 6vw, 4.5rem);
+    overflow: hidden;
+  }
+
+  .ghero :global(.ghero__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ghero__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgb(42 35 32 / 0.78) 0%,
+      rgb(42 35 32 / 0.38) 38%,
+      rgb(42 35 32 / 0.05) 70%,
+      rgb(42 35 32 / 0.24) 100%
+    );
+  }
+
+  .ghero__inner {
+    position: relative;
+    width: 100%;
+    color: var(--paper);
+  }
+
+  .ghero__kind {
+    font-size: var(--fs-small);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.82;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+
+  .ghero__title {
+    font-size: clamp(2.25rem, 6vw, 5rem);
+    line-height: 1;
+  }
+
+  /* ── Case study cross-link ─────────────────────────────────────── */
+  .studyline {
+    padding-block: 1.5rem;
+  }
+
+  .studyline__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .studyline__inner p {
+    margin: 0;
+    font-family: var(--display);
+    font-size: 1.125rem;
+  }
+
+  /* ── Gallery ───────────────────────────────────────────────────── */
+  .gal__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1rem, 2vw, 1.75rem);
+  }
+
+  .gal__item {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 4 / 5;
+    background: var(--paper-deep);
+  }
+
+  /* Every fifth image runs full width — breaks the grid into something
+     that reads like a photo essay rather than a contact sheet. */
+  .gal__item--wide {
+    grid-column: 1 / -1;
+    aspect-ratio: 16 / 9;
+  }
+
+  .gal__item :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .gal__note {
+    margin: 2rem 0 0;
+    text-align: center;
+    font-size: var(--fs-small);
+    font-style: italic;
+    color: var(--ink-faint);
+  }
+
+  /* ── Prev / next ───────────────────────────────────────────────── */
+  .gnav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .gnav__link {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .gnav__link--next {
+    text-align: right;
+  }
+
+  .gnav__label {
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+  }
+
+  .gnav__name {
+    font-family: var(--display);
+    font-size: 1.25rem;
+  }
+
+  .gnav__link:hover .gnav__name {
+    color: var(--terracotta);
+  }
+
+  @media (max-width: 700px) {
+    .gal__grid {
+      grid-template-columns: 1fr;
+    }
+    .gal__item--wide {
+      aspect-ratio: 4 / 5;
+    }
+    .gnav__all {
+      order: 3;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

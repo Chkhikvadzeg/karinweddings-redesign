@@ -140,6 +140,10 @@ const lead = testimonials[0];
           ))
         }
       </div>
+
+      <p class="work__more" data-reveal>
+        <a class="textlink" href={url('/portfolio/')}>See all 24 galleries →</a>
+      </p>
     </div>
   </section>
 
@@ -455,6 +459,10 @@ const lead = testimonials[0];
     font-size: 0.9375rem;
     color: var(--ink-soft);
     margin-bottom: 1rem;
+  }
+
+  .work__more {
+    margin-top: clamp(2rem, 4vw, 3rem);
   }
 
   @media (max-width: 900px) {

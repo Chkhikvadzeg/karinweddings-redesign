@@ -57,6 +57,45 @@ until their images arrive. Same symptom, different fix.
 
 ---
 
+## Asset harvest from the legacy site
+
+`scripts/harvest.mjs` walks all three sitemaps (103 pages) and collects images
+from `<img src>`, `srcset` and CSS `background-image`. It found:
+
+| | Count |
+|---|---|
+| Distinct photographs | **3,723** (~0.90 GB) |
+| Galleries | **24**, from 18 to 375 photos each |
+| Logos | 6 |
+| Ornaments | 10 |
+
+**Not all of it is bundled.** 0.90 GB would exceed GitHub Pages' repo limit and
+make every build run sharp over thousands of files nobody would reach.
+`scripts/harvest-curated.mjs` takes every logo and ornament plus **12 photos per
+gallery — 288 images, 60 MB**. Re-run it with a higher number to pull more:
+
+```bash
+node scripts/harvest.mjs --dry          # enumerate
+node scripts/harvest-curated.mjs 24     # 24 per gallery instead of 12
+```
+
+Consequence: **the build takes ~5 minutes**, almost entirely sharp encoding
+AVIF variants for 288 photographs.
+
+### What the harvest changed
+
+- **Her real logo** now appears in the nav and footer. It ships once as an
+  ink-recoloured PNG and is inverted to white by CSS over dark heroes.
+- **A real portfolio**: `/portfolio/` lists all 24 galleries with her actual
+  couple names — Lučka & Domen, Ulla & Matjaž, Jasmina & Matic — each with its
+  own gallery page, prev/next, and a cross-link to a case study where one
+  exists. The live site's Portfolio is a flat grid of names.
+- **A factual correction.** One gallery is named `kelly-ervin-indijska-poroka`
+  — an Indian wedding — and there is a second `kelly-ervin` gallery. My original
+  case study invented a "planned across two time zones" story. It is now written
+  around two ceremonies for two traditions, which is what the evidence supports.
+  The specifics still need Karin's confirmation.
+
 ## Generated assets
 
 Four assets were generated with Higgsfield (Recraft V4.1). All are disclosed

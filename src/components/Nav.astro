@@ -1,6 +1,8 @@
 ---
+import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { url } from '../lib/url';
+import mark from '../assets/brand/karin-mark-ink.png';
 
 interface Props {
   overlay?: boolean;
@@ -10,7 +12,7 @@ const { overlay = false } = Astro.props;
 const links = [
   { href: url('/#process'), label: 'How it works' },
   { href: url('/services/full-planning/'), label: 'Services' },
-  { href: url('/work/kelly-and-ervin/'), label: 'Weddings' },
+  { href: url('/portfolio/'), label: 'Portfolio' },
   { href: url('/#about'), label: 'About Karin' },
 ];
 
@@ -29,7 +31,9 @@ const langs = [
 <header class:list={['nav', { 'nav--overlay': overlay }]} data-nav>
   <div class="nav__inner">
     <a href={url('/')} class="nav__mark" aria-label={`${site.name} — home`}>
-      <span class="script">Karin</span>
+      {/* Her real logo mark, recoloured to ink; inverted to white by CSS when
+          the nav overlays a dark hero. */}
+      <Image src={mark} alt="" width={120} height={38} densities={[1, 2]} class="nav__markImg" />
       <span class="nav__markSub">Weddings &amp; Events</span>
     </a>
 
@@ -119,8 +123,15 @@ const langs = [
     line-height: 1;
   }
 
-  .nav__mark .script {
-    font-size: 1.75rem;
+  .nav__mark :global(.nav__markImg) {
+    width: 118px;
+    height: auto;
+    transition: filter 0.35s var(--ease);
+  }
+
+  /* One asset, two contexts: invert to white over the dark hero. */
+  .nav--overlay:not(.is-stuck) .nav__mark :global(.nav__markImg) {
+    filter: brightness(0) invert(1);
   }
 
   .nav__markSub {
@@ -206,8 +217,8 @@ const langs = [
     .nav__langs {
       display: none;
     }
-    .nav__mark .script {
-      font-size: 1.5rem;
+    .nav__mark :global(.nav__markImg) {
+      width: 96px;
     }
   }
 </style>

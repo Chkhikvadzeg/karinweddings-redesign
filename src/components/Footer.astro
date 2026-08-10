@@ -3,13 +3,17 @@ import { site } from '../data/site';
 import { services } from '../data/services';
 import { work } from '../data/work';
 import { url } from '../lib/url';
+import { Image } from 'astro:assets';
+import mark from '../assets/brand/karin-mark-ink.png';
 ---
 
 <footer class="foot">
   <div class="shell">
     <div class="foot__top">
       <div class="foot__brand">
-        <p class="foot__mark"><span class="script">Karin</span></p>
+        <p class="foot__mark">
+          <Image src={mark} alt={site.name} width={150} height={48} densities={[1, 2]} />
+        </p>
         <p class="foot__line">
           {site.weddingsPlanned} weddings. Slovenian, English and German.
         </p>
@@ -28,6 +32,7 @@ import { url } from '../lib/url';
         <h2>Weddings</h2>
         <ul>
           {work.map((w) => <li><a href={url(`/work/${w.slug}/`)}>{w.couple}</a></li>)}
+          <li><a href={url('/portfolio/')}>All galleries</a></li>
           <li><a href={url('/#process')}>How it works</a></li>
         </ul>
       </div>
@@ -70,8 +75,10 @@ import { url } from '../lib/url';
     margin: 0 0 0.75rem;
   }
 
-  .foot__mark .script {
-    font-size: 2.25rem;
+  .foot__mark :global(img) {
+    width: 148px;
+    height: auto;
+    filter: brightness(0) invert(1);
   }
 
   .foot__line {
