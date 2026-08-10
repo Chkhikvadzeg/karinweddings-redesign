@@ -1,0 +1,457 @@
+---
+/**
+ * Calendar date picker — replaces <input type="date">.
+ *
+ * The native control is worth replacing here for one reason beyond looks: it
+ * cannot show what we know about a date. This calendar marks high-demand days
+ * (summer Saturdays) as the couple browses, which is the single most useful
+ * thing we can tell them before they enquire.
+ *
+ * Accessibility: a real <dialog>-less disclosure with role="grid", roving
+ * tabindex, full arrow-key navigation, Home/End, PageUp/PageDown, Escape to
+ * close, and focus returned to the trigger. The selected value is written to a
+ * hidden input so it submits like any other field.
+ */
+interface Props {
+  name: string;
+  label: string;
+  id?: string;
+}
+
+const { name, label, id = name } = Astro.props;
+---
+
+<date-picker class="dp" data-name={name}>
+  <label class="dp__label" for={`${id}-trigger`}>{label}</label>
+
+  <button type="button" class="dp__trigger" id={`${id}-trigger`} aria-expanded="false" aria-haspopup="true">
+    <span class="dp__value" data-dp-display>Choose a date</span>
+    <svg class="dp__icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.25">
+      <rect x="3" y="5" width="18" height="16" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </svg>
+  </button>
+
+  <input type="hidden" name={name} data-dp-input />
+
+  <div class="dp__pop" hidden data-dp-pop>
+    <div class="dp__head">
+      <button type="button" class="dp__nav" data-dp-prev aria-label="Previous month">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.25"
+          ><path d="M15 5l-7 7 7 7" /></svg
+        >
+      </button>
+      <p class="dp__month" aria-live="polite" data-dp-month></p>
+      <button type="button" class="dp__nav" data-dp-next aria-label="Next month">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.25"
+          ><path d="M9 5l7 7-7 7" /></svg
+        >
+      </button>
+    </div>
+
+    <div class="dp__dow" aria-hidden="true">
+      <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+    </div>
+
+    <div class="dp__grid" role="grid" aria-label="Choose a date" data-dp-grid></div>
+
+    <p class="dp__key">
+      <span class="dp__dot dp__dot--peak" aria-hidden="true"></span> Books 12–18 months ahead
+      <span class="dp__dot" aria-hidden="true"></span> Busy season
+    </p>
+  </div>
+</date-picker>
+
+<script>
+  import { demandFor } from '../../lib/qualify';
+
+  const MONTHS = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+
+  const iso = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  class DatePickerEl extends HTMLElement {
+    private open = false;
+    private view = new Date();
+    private selected: Date | null = null;
+    /** The day that owns tabindex=0 in the roving-tabindex grid */
+    private focused = new Date();
+
+    private trigger!: HTMLButtonElement;
+    private pop!: HTMLElement;
+    private grid!: HTMLElement;
+    private monthEl!: HTMLElement;
+    private display!: HTMLElement;
+    private input!: HTMLInputElement;
+
+    connectedCallback() {
+      this.trigger = this.querySelector('.dp__trigger')!;
+      this.pop = this.querySelector('[data-dp-pop]')!;
+      this.grid = this.querySelector('[data-dp-grid]')!;
+      this.monthEl = this.querySelector('[data-dp-month]')!;
+      this.display = this.querySelector('[data-dp-display]')!;
+      this.input = this.querySelector('[data-dp-input]')!;
+
+      // Never open on a month the couple cannot book.
+      this.view.setDate(1);
+      this.focused = new Date();
+
+      this.trigger.addEventListener('click', () => this.toggle());
+      this.querySelector('[data-dp-prev]')!.addEventListener('click', () => this.shiftMonth(-1));
+      this.querySelector('[data-dp-next]')!.addEventListener('click', () => this.shiftMonth(1));
+
+      this.grid.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-day]');
+        if (btn) this.select(new Date(btn.dataset.day!));
+      });
+
+      this.grid.addEventListener('keydown', (e) => this.onGridKey(e));
+
+      document.addEventListener('click', (e) => {
+        if (this.open && !this.contains(e.target as Node)) this.close();
+      });
+
+      this.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.open) {
+          e.stopPropagation();
+          this.close();
+          this.trigger.focus();
+        }
+      });
+
+      this.render();
+    }
+
+    private toggle() {
+      this.open ? this.close() : this.openPop();
+    }
+
+    private openPop() {
+      this.open = true;
+      this.pop.hidden = false;
+      this.trigger.setAttribute('aria-expanded', 'true');
+      this.view = new Date(this.selected ?? this.focused);
+      this.view.setDate(1);
+      this.render();
+      this.grid.querySelector<HTMLButtonElement>('[tabindex="0"]')?.focus();
+    }
+
+    private close() {
+      this.open = false;
+      this.pop.hidden = true;
+      this.trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    private shiftMonth(delta: number) {
+      this.view.setMonth(this.view.getMonth() + delta);
+      this.render();
+    }
+
+    /** Arrow keys move by day/week; the grid re-renders if we cross a month. */
+    private onGridKey(e: KeyboardEvent) {
+      const moves: Record<string, number> = {
+        ArrowRight: 1, ArrowLeft: -1, ArrowDown: 7, ArrowUp: -7,
+      };
+      const next = new Date(this.focused);
+
+      if (e.key in moves) {
+        next.setDate(next.getDate() + moves[e.key]);
+      } else if (e.key === 'Home') {
+        next.setDate(1);
+      } else if (e.key === 'End') {
+        next.setMonth(next.getMonth() + 1, 0);
+      } else if (e.key === 'PageUp') {
+        next.setMonth(next.getMonth() - 1);
+      } else if (e.key === 'PageDown') {
+        next.setMonth(next.getMonth() + 1);
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.select(new Date(this.focused));
+        return;
+      } else {
+        return;
+      }
+
+      e.preventDefault();
+      this.focused = next;
+      if (
+        next.getMonth() !== this.view.getMonth() ||
+        next.getFullYear() !== this.view.getFullYear()
+      ) {
+        this.view = new Date(next);
+        this.view.setDate(1);
+      }
+      this.render();
+      this.grid.querySelector<HTMLButtonElement>('[tabindex="0"]')?.focus();
+    }
+
+    private select(d: Date) {
+      this.selected = d;
+      this.focused = d;
+      this.input.value = iso(d);
+      this.display.textContent = d.toLocaleDateString('en-GB', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+      });
+      this.display.classList.add('is-set');
+      // Let the enquiry form's qualification logic re-run.
+      this.input.dispatchEvent(new Event('change', { bubbles: true }));
+      this.close();
+      this.trigger.focus();
+    }
+
+    private render() {
+      this.monthEl.textContent = `${MONTHS[this.view.getMonth()]} ${this.view.getFullYear()}`;
+
+      const first = new Date(this.view.getFullYear(), this.view.getMonth(), 1);
+      const daysInMonth = new Date(this.view.getFullYear(), this.view.getMonth() + 1, 0).getDate();
+      // getDay() is Sunday-first; shift to Monday-first.
+      const lead = (first.getDay() + 6) % 7;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const cells: string[] = [];
+      for (let i = 0; i < lead; i++) cells.push('<span class="dp__pad"></span>');
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const d = new Date(this.view.getFullYear(), this.view.getMonth(), day);
+        const key = iso(d);
+        const past = d < today;
+        const isSelected = this.selected != null && iso(this.selected) === key;
+        const isFocused =
+          this.focused.getDate() === day &&
+          this.focused.getMonth() === this.view.getMonth() &&
+          this.focused.getFullYear() === this.view.getFullYear();
+        const demand = demandFor(key);
+        const demandNote =
+          demand === 'peak' ? ', books far ahead' : demand === 'busy' ? ', busy season' : '';
+
+        cells.push(`
+          <button type="button" role="gridcell" data-day="${key}"
+            class="dp__day is-${demand}${isSelected ? ' is-selected' : ''}"
+            tabindex="${isFocused ? 0 : -1}"
+            ${past ? 'disabled aria-disabled="true"' : ''}
+            aria-selected="${isSelected}"
+            aria-label="${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}${demandNote}">
+            <span>${day}</span>
+          </button>`);
+      }
+
+      // Safe: every interpolated value is derived from Date objects and the
+      // hardcoded 'en-GB' locale. No user-supplied string reaches this markup.
+      this.grid.innerHTML = cells.join('');
+    }
+  }
+
+  if (!customElements.get('date-picker')) {
+    customElements.define('date-picker', DatePickerEl);
+  }
+</script>
+
+<style>
+  .dp {
+    display: block;
+    position: relative;
+    margin-bottom: 1.25rem;
+  }
+
+  .dp__label {
+    display: block;
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.55rem;
+  }
+
+  .dp__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-height: 46px;
+    padding: 0.85rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--ink-faint);
+    font-size: 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.22s var(--ease);
+  }
+
+  .dp__trigger:hover {
+    border-color: var(--lake-light);
+  }
+
+  .dp__value.is-set {
+    color: var(--ink);
+    font-family: var(--display);
+  }
+
+  .dp__icon {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    color: var(--ink-faint);
+  }
+
+  /* ── Popover ─────────────────────────────────────────────── */
+  .dp__pop {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    width: min(21rem, 100%);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: 0 18px 40px -20px rgb(26 24 21 / 0.28);
+    padding: 1rem;
+  }
+
+  .dp__pop[hidden] {
+    display: none;
+  }
+
+  .dp__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+  }
+
+  .dp__month {
+    font-family: var(--display);
+    font-size: 1.0625rem;
+    margin: 0;
+  }
+
+  .dp__nav {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: border-color 0.22s var(--ease), color 0.22s var(--ease);
+  }
+
+  .dp__nav svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .dp__nav:hover {
+    border-color: var(--rule);
+    color: var(--ink);
+  }
+
+  .dp__dow,
+  .dp__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+
+  .dp__dow {
+    margin-bottom: 0.35rem;
+  }
+
+  .dp__dow span {
+    text-align: center;
+    font-size: 0.625rem;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+
+  /* :global throughout — the day cells are rendered at runtime and so never
+     carry Astro's scoping attribute. */
+  .dp__grid :global(.dp__day) {
+    position: relative;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 1px solid transparent;
+    color: var(--ink);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: background 0.18s var(--ease), color 0.18s var(--ease);
+  }
+
+  .dp__grid :global(.dp__day:hover:not(:disabled)) {
+    background: var(--paper-warm);
+  }
+
+  .dp__grid :global(.dp__day:disabled) {
+    color: var(--rule);
+    cursor: default;
+  }
+
+  .dp__grid :global(.dp__day.is-selected) {
+    background: var(--lake);
+    color: var(--paper);
+  }
+
+  .dp__grid :global(.dp__day:focus-visible) {
+    outline: 2px solid var(--lake);
+    outline-offset: -2px;
+  }
+
+  /* Demand markers. Never colour alone — the aria-label carries it too.
+     A solid dot for summer Saturdays, a hollow one for merely busy days. */
+  .dp__grid :global(.dp__day.is-peak:not(:disabled))::after,
+  .dp__grid :global(.dp__day.is-busy:not(:disabled))::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    border: 1px solid var(--lake-light);
+  }
+
+  .dp__grid :global(.dp__day.is-peak:not(:disabled))::after {
+    background: var(--lake-light);
+  }
+
+  .dp__grid :global(.dp__day.is-selected)::after {
+    border-color: var(--paper);
+    background: var(--paper);
+  }
+
+  .dp__key {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.85rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+  }
+
+  .dp__dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    border: 1px solid var(--lake-light);
+    flex: none;
+  }
+
+  .dp__dot--peak {
+    background: var(--lake-light);
+  }
+
+  .dp__key {
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+  }
+</style>

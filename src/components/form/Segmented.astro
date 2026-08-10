@@ -1,0 +1,161 @@
+---
+/**
+ * Segmented control — replaces a native <select> for short, fixed option sets.
+ *
+ * Built on real radio inputs, so it is keyboard-navigable (arrow keys, per the
+ * native radiogroup behaviour), announced correctly by screen readers, and
+ * submits with the form. Zero JavaScript.
+ *
+ * The visual chrome is entirely :checked + :focus-visible CSS on the label.
+ */
+interface Option {
+  value: string;
+  label: string;
+  /** Optional smaller line beneath the label */
+  note?: string;
+}
+
+interface Props {
+  name: string;
+  legend: string;
+  options: Option[];
+  value?: string;
+  /** Stack vertically instead of as a row */
+  stacked?: boolean;
+}
+
+const { name, legend, options, value, stacked = false } = Astro.props;
+---
+
+<fieldset class:list={['seg', { 'seg--stacked': stacked }]}>
+  <legend class="seg__legend">{legend}</legend>
+  <div class="seg__track" role="presentation">
+    {
+      options.map((o) => (
+        <label class="seg__item">
+          <input
+            type="radio"
+            name={name}
+            value={o.value}
+            checked={value === o.value}
+            class="seg__input"
+          />
+          <span class="seg__face">
+            <span class="seg__label">{o.label}</span>
+            {o.note && <span class="seg__note">{o.note}</span>}
+          </span>
+        </label>
+      ))
+    }
+  </div>
+</fieldset>
+
+<style>
+  .seg {
+    border: 0;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .seg__legend {
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.55rem;
+    padding: 0;
+  }
+
+  .seg__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+  }
+
+  .seg--stacked .seg__track {
+    grid-auto-flow: row;
+    grid-auto-columns: auto;
+  }
+
+  .seg__item {
+    position: relative;
+    display: block;
+    cursor: pointer;
+  }
+
+  .seg__item + .seg__item .seg__face {
+    border-left: 1px solid var(--rule);
+  }
+
+  .seg--stacked .seg__item + .seg__item .seg__face {
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  /* The input stays in the accessibility tree and keeps native keyboard
+     behaviour — it is only visually hidden, never display:none. */
+  .seg__input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+    inset: 0;
+  }
+
+  .seg__face {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    /* 44px minimum touch target */
+    min-height: 46px;
+    padding: 0.6rem 0.75rem;
+    text-align: center;
+    transition: background 0.22s var(--ease), color 0.22s var(--ease);
+  }
+
+  .seg__label {
+    font-size: 0.875rem;
+    line-height: 1.2;
+  }
+
+  .seg__note {
+    font-size: 0.6875rem;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+  }
+
+  .seg__item:hover .seg__face {
+    background: var(--paper-warm);
+  }
+
+  .seg__input:checked + .seg__face {
+    background: var(--lake);
+    color: var(--paper);
+  }
+
+  .seg__input:checked + .seg__face .seg__note {
+    color: rgb(250 247 242 / 0.7);
+  }
+
+  .seg__input:focus-visible + .seg__face {
+    outline: 2px solid var(--lake);
+    outline-offset: -3px;
+  }
+
+  @media (max-width: 560px) {
+    .seg__track {
+      grid-auto-flow: row;
+    }
+    .seg__item + .seg__item .seg__face {
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+  }
+</style>

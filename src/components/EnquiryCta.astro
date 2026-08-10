@@ -1,0 +1,64 @@
+---
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  context?: string;
+  heading?: string;
+}
+
+const { context, heading = 'Start with a date' } = Astro.props;
+const href = context ? url(`/enquire/?for=${encodeURIComponent(context)}`) : url('/enquire/');
+---
+
+<section class="band band--clay cta">
+  <div class="shell cta__shell" data-reveal>
+    <h2 class="cta__title">{heading}</h2>
+    <p class="cta__lead">
+      Tell me roughly when and roughly how many, and I will come back within one working day with
+      whether it is possible and what it honestly costs.
+    </p>
+    <div class="cta__actions">
+      <a class="btn" href={href}>Check your date</a>
+      <a class="btn btn--quiet" href={`tel:${site.phoneHref}`}>{site.phone}</a>
+    </div>
+    <p class="cta__alt">or email <a href={`mailto:${site.email}`}>{site.email}</a></p>
+  </div>
+</section>
+
+<style>
+  .cta {
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+
+  .cta__shell {
+    text-align: center;
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+
+  .cta__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .cta__lead {
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin-bottom: 2.25rem;
+  }
+
+  .cta__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .cta__alt {
+    margin: 1.25rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+  }
+</style>

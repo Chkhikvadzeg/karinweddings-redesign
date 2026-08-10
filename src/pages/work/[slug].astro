@@ -1,0 +1,381 @@
+---
+import Base from '../../layouts/Base.astro';
+import Pic from '../../components/Pic.astro';
+import EnquiryCta from '../../components/EnquiryCta.astro';
+import { work } from '../../data/work';
+import { photo } from '../../lib/images';
+import { url } from '../../lib/url';
+
+// One template, one page per wedding.
+export function getStaticPaths() {
+  return work.map((study) => ({ params: { slug: study.slug }, props: { study } }));
+}
+
+const { study } = Astro.props;
+const others = work.filter((w) => w.slug !== study.slug);
+---
+
+<Base
+  title={`${study.couple} — ${study.title} | Karin Weddings & Events`}
+  description={study.challenge}
+  navOverlay
+>
+  <section class="chero">
+    <Pic
+      class="chero__img"
+      src={photo(study.photo)}
+      alt={`${study.couple}, ${study.venue}`}
+      widths={[720, 1200, 1800]}
+      sizes="100vw"
+      priority
+    />
+    <div class="chero__scrim"></div>
+    <div class="shell chero__inner">
+      <p class="chero__kicker">{study.venue} · {study.season}</p>
+      <h1 class="chero__couple script">{study.couple}</h1>
+      <p class="chero__title">{study.title}</p>
+    </div>
+  </section>
+
+  <!-- ── Facts ───────────────────────────────────────────────────────── -->
+  <section class="band band--ink facts">
+    <div class="shell facts__grid">
+      <div><dt>Guests</dt><dd>{study.guests === 2 ? 'Two' : study.guests}</dd></div>
+      <div><dt>Where</dt><dd>{study.venue}</dd></div>
+      <div><dt>Season</dt><dd>{study.season}</dd></div>
+      <div><dt>Service</dt><dd>{study.service}</dd></div>
+    </div>
+  </section>
+
+  <!-- ── The challenge, stated plainly ───────────────────────────────── -->
+  <section class="section challenge">
+    <div class="shell">
+      <p class="eyebrow" data-reveal>The difficult bit</p>
+      <p class="challenge__text" data-reveal data-reveal-delay="60">{study.challenge}</p>
+    </div>
+  </section>
+
+  <!-- ── Story ───────────────────────────────────────────────────────── -->
+  <section class="band band--deep section story">
+    <div class="shell story__shell">
+      {
+        study.story.map((s, i) => (
+          <article class="chapter" data-reveal data-reveal-delay={i * 90}>
+            <h2 class="chapter__heading">
+              <span class="chapter__num">{String(i + 1).padStart(2, '0')}</span>
+              {s.heading}
+            </h2>
+            <p class="chapter__body">{s.body}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  {
+    study.quote && (
+      <section class="band band--clay section cquote">
+        <div class="shell" data-reveal>
+          <figure class="cquote__fig">
+            <blockquote>{study.quote.text}</blockquote>
+            <figcaption>{study.quote.author}</figcaption>
+          </figure>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- ── Gallery ─────────────────────────────────────────────────────── -->
+  <section class="section gallery">
+    <div class="shell">
+      <p class="eyebrow" data-reveal>From the day</p>
+      <div class="gallery__grid">
+        {
+          study.gallery.map((name, i) => (
+            <figure class="gallery__item" data-reveal data-reveal-delay={i * 80}>
+              <Pic
+                src={photo(name)}
+                alt={`${study.couple} — photograph ${i + 1}`}
+                widths={[480, 960]}
+                sizes="(max-width: 900px) 90vw, 31vw"
+              />
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Other weddings ──────────────────────────────────────────────── -->
+  <section class="band band--deep section cothers">
+    <div class="shell">
+      <p class="eyebrow" data-reveal>More weddings</p>
+      <div class="cothers__grid">
+        {
+          others.map((w, i) => (
+            <a class="ocard" href={url(`/work/${w.slug}/`)} data-reveal data-reveal-delay={i * 90}>
+              <div class="ocard__img">
+                <Pic
+                  src={photo(w.photo)}
+                  alt=""
+                  decorative
+                  widths={[420, 840]}
+                  sizes="(max-width: 900px) 90vw, 45vw"
+                />
+              </div>
+              <h2 class="ocard__couple">{w.couple}</h2>
+              <p class="ocard__meta">{w.venue} · {w.season}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <EnquiryCta heading="Your wedding is the next one" />
+</Base>
+
+<style>
+  .chero {
+    position: relative;
+    min-height: min(86svh, 760px);
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: clamp(3rem, 7vw, 5.5rem);
+    overflow: hidden;
+  }
+
+  .chero :global(.chero__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .chero__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgb(42 35 32 / 0.8) 0%,
+      rgb(42 35 32 / 0.42) 36%,
+      rgb(42 35 32 / 0.06) 70%,
+      rgb(42 35 32 / 0.22) 100%
+    );
+  }
+
+  .chero__inner {
+    position: relative;
+    width: 100%;
+    color: var(--paper);
+  }
+
+  .chero__kicker {
+    font-size: var(--fs-small);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 0.85rem;
+    font-weight: 600;
+  }
+
+  .chero__couple {
+    font-size: clamp(2.5rem, 6.5vw, 5.5rem);
+    line-height: 1;
+    margin-bottom: 0.85rem;
+  }
+
+  .chero__title {
+    font-size: var(--fs-lead);
+    max-width: 36rem;
+    color: rgb(251 248 244 / 0.88);
+    margin: 0;
+  }
+
+  /* ── Facts ────────────────────────────────────────────────────────── */
+  .facts {
+    padding-block: clamp(1.6rem, 3vw, 2.25rem);
+  }
+
+  .facts__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+
+  .facts__grid dt {
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgb(251 248 244 / 0.45);
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+  }
+
+  .facts__grid dd {
+    margin: 0;
+    font-family: var(--display);
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+  }
+
+  @media (max-width: 700px) {
+    .facts__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.1rem;
+    }
+  }
+
+  /* ── Challenge ────────────────────────────────────────────────────── */
+  .challenge {
+    padding-block: clamp(3rem, 7vw, 6rem);
+  }
+
+  .challenge__text {
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1;
+    font-size: clamp(1.5rem, 3.4vw, 2.75rem);
+    line-height: 1.25;
+    max-width: 22ch;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  /* ── Story ────────────────────────────────────────────────────────── */
+  .story__shell {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .chapter__heading {
+    font-size: 1.375rem;
+    margin-bottom: 1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    gap: 0.7rem;
+    align-items: baseline;
+  }
+
+  .chapter__num {
+    font-family: var(--sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: var(--terracotta);
+  }
+
+  .chapter__body {
+    font-size: 0.9375rem;
+    line-height: 1.68;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  @media (max-width: 900px) {
+    .story__shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Quote ────────────────────────────────────────────────────────── */
+  .cquote__fig {
+    margin: 0;
+    max-width: 46rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .cquote__fig blockquote {
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1;
+    font-style: italic;
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    line-height: 1.35;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+
+  .cquote__fig figcaption {
+    font-size: var(--fs-small);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* ── Gallery ──────────────────────────────────────────────────────── */
+  .gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1rem, 2vw, 1.75rem);
+    margin-top: 0.5rem;
+  }
+
+  .gallery__item {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .gallery__item :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 700px) {
+    .gallery__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  /* ── Other weddings ───────────────────────────────────────────────── */
+  .cothers__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    margin-top: 0.5rem;
+  }
+
+  .ocard {
+    text-decoration: none;
+  }
+
+  .ocard__img {
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .ocard__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+
+  .ocard:hover .ocard__img :global(img) {
+    transform: scale(1.04);
+  }
+
+  .ocard__couple {
+    font-size: 1.375rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .ocard__meta {
+    font-size: var(--fs-small);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  @media (max-width: 700px) {
+    .cothers__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

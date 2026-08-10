@@ -1,0 +1,120 @@
+---
+import '../styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  title: string;
+  description: string;
+  navOverlay?: boolean;
+}
+
+const { title, description, navOverlay = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name: site.name,
+  legalName: site.legalName,
+  description,
+  url: Astro.site?.toString(),
+  email: site.email,
+  telephone: site.phone,
+  areaServed: 'Slovenia',
+  knowsLanguage: ['sl', 'en', 'de'],
+  address: { '@type': 'PostalAddress', addressCountry: 'SI' },
+  sameAs: Object.values(site.social),
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    {/* Unsolicited redesign demo carrying a real business's name, contact
+        details and photography, plus placeholder pricing. Must never be
+        indexed — it would compete with the real site. */}
+    <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#fbf8f4" />
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <ClientRouter />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    {/* Banner and nav share one positioned wrapper. Keeping them separate made
+        the fixed overlay nav slide underneath the banner and clip the wordmark. */}
+    <div class:list={['topbar', { 'topbar--overlay': navOverlay }]}>
+      <p class="demo-banner">
+        Unofficial redesign concept for <strong>karinweddingsevents.com</strong> — not affiliated
+        with the business. Prices shown are placeholders.
+      </p>
+      <Nav overlay={navOverlay} />
+    </div>
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // Runs on first load and after every View Transition swap, so it must
+      // be idempotent.
+      function initPage() {
+        const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (targets.length && 'IntersectionObserver' in window && !reduced) {
+          targets.forEach((el) => el.setAttribute('data-reveal-ready', ''));
+
+          const io = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                const el = entry.target as HTMLElement;
+                const delay = Number(el.dataset.revealDelay ?? 0);
+                setTimeout(() => el.classList.add('is-in'), delay);
+                io.unobserve(el);
+              });
+            },
+            { rootMargin: '0px 0px -12% 0px', threshold: 0.05 }
+          );
+
+          targets.forEach((el) => io.observe(el));
+
+          // IntersectionObserver only fires when the viewport moves, so a
+          // screenshot or scraper that renders without scrolling would leave
+          // everything below the fold hidden. Reveal the remainder regardless.
+          window.setTimeout(() => {
+            targets.forEach((el) => {
+              if (!el.classList.contains('is-in')) {
+                el.classList.add('is-in');
+                io.unobserve(el);
+              }
+            });
+          }, 4000);
+        }
+
+        const nav = document.querySelector('[data-nav]');
+        if (nav) {
+          const onScroll = () => nav.classList.toggle('is-stuck', window.scrollY > 60);
+          onScroll();
+          window.addEventListener('scroll', onScroll, { passive: true });
+        }
+      }
+
+      initPage();
+      document.addEventListener('astro:after-swap', initPage);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,356 @@
+---
+/**
+ * Searchable combobox — replaces a native <select> where the list is long
+ * enough that scanning it is work.
+ *
+ * Implements the WAI-ARIA combobox pattern: role="combobox" on the input,
+ * aria-expanded, aria-controls, aria-activedescendant pointing at the visually
+ * highlighted option, and role="listbox"/"option" on the popup. Arrow keys,
+ * Enter, Escape and Tab all behave the way a native select does; the value
+ * lands in a hidden input so the form submits identically.
+ */
+interface Option {
+  value: string;
+  label: string;
+  meta?: string;
+}
+
+interface Props {
+  name: string;
+  label: string;
+  placeholder?: string;
+  options: Option[];
+  hint?: string;
+}
+
+const { name, label, placeholder = 'Type to search', options, hint } = Astro.props;
+const listId = `${name}-listbox`;
+---
+
+<combo-box class="cb" data-name={name}>
+  <label class="cb__label" for={`${name}-input`}>
+    {label}
+    {hint && <span class="cb__hint">{hint}</span>}
+  </label>
+
+  <div class="cb__shell">
+    <input
+      class="cb__input"
+      id={`${name}-input`}
+      type="text"
+      role="combobox"
+      autocomplete="off"
+      placeholder={placeholder}
+      aria-expanded="false"
+      aria-controls={listId}
+      aria-autocomplete="list"
+    />
+    <button type="button" class="cb__clear" hidden data-cb-clear aria-label={`Clear ${label}`}>
+      <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4"
+        ><path d="M6 6l12 12M18 6L6 18" /></svg
+      >
+    </button>
+  </div>
+
+  <input type="hidden" name={name} data-cb-value />
+
+  <ul class="cb__list" id={listId} role="listbox" hidden data-cb-list>
+    {
+      options.map((o) => (
+        <li
+          class="cb__option"
+          role="option"
+          id={`${name}-opt-${o.value}`}
+          data-value={o.value}
+          data-search={`${o.label} ${o.meta ?? ''}`.toLowerCase()}
+          aria-selected="false"
+        >
+          <span class="cb__optLabel">{o.label}</span>
+          {o.meta && <span class="cb__optMeta">{o.meta}</span>}
+        </li>
+      ))
+    }
+    <li class="cb__empty" hidden data-cb-empty>No match — we will help you choose.</li>
+  </ul>
+</combo-box>
+
+<script>
+  class ComboBox extends HTMLElement {
+    private input!: HTMLInputElement;
+    // NOT `hidden` — that name collides with HTMLElement.hidden, which would
+    // both throw on assignment and hide this entire element.
+    private valueInput!: HTMLInputElement;
+    private list!: HTMLElement;
+    private clearBtn!: HTMLButtonElement;
+    private empty!: HTMLElement;
+    private options: HTMLLIElement[] = [];
+    private active = -1;
+
+    connectedCallback() {
+      this.input = this.querySelector('.cb__input')!;
+      this.valueInput = this.querySelector('[data-cb-value]')!;
+      this.list = this.querySelector('[data-cb-list]')!;
+      this.clearBtn = this.querySelector('[data-cb-clear]')!;
+      this.empty = this.querySelector('[data-cb-empty]')!;
+      this.options = [...this.querySelectorAll<HTMLLIElement>('.cb__option')];
+
+      this.input.addEventListener('focus', () => this.open());
+      this.input.addEventListener('input', () => {
+        this.open();
+        this.filter();
+      });
+      this.input.addEventListener('keydown', (e) => this.onKey(e));
+
+      this.list.addEventListener('mousedown', (e) => {
+        // mousedown, not click — click fires after blur closes the list
+        const li = (e.target as HTMLElement).closest<HTMLLIElement>('.cb__option');
+        if (li) {
+          e.preventDefault();
+          this.choose(li);
+        }
+      });
+
+      this.clearBtn.addEventListener('click', () => this.clear());
+
+      document.addEventListener('click', (e) => {
+        if (!this.contains(e.target as Node)) this.close();
+      });
+    }
+
+    private open() {
+      this.list.hidden = false;
+      this.input.setAttribute('aria-expanded', 'true');
+    }
+
+    private close() {
+      this.list.hidden = true;
+      this.input.setAttribute('aria-expanded', 'false');
+      this.setActive(-1);
+    }
+
+    private visible() {
+      return this.options.filter((o) => !o.hidden);
+    }
+
+    private filter() {
+      const q = this.input.value.trim().toLowerCase();
+      this.options.forEach((o) => {
+        o.hidden = q.length > 0 && !o.dataset.search!.includes(q);
+      });
+      this.empty.hidden = this.visible().length > 0;
+      this.setActive(-1);
+    }
+
+    private setActive(i: number) {
+      const vis = this.visible();
+      this.options.forEach((o) => o.classList.remove('is-active'));
+      this.active = i;
+
+      if (i < 0 || !vis[i]) {
+        this.input.removeAttribute('aria-activedescendant');
+        return;
+      }
+      vis[i].classList.add('is-active');
+      this.input.setAttribute('aria-activedescendant', vis[i].id);
+      vis[i].scrollIntoView({ block: 'nearest' });
+    }
+
+    private onKey(e: KeyboardEvent) {
+      const vis = this.visible();
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        this.open();
+        this.setActive(Math.min(this.active + 1, vis.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        this.setActive(Math.max(this.active - 1, 0));
+      } else if (e.key === 'Enter') {
+        if (this.active >= 0 && vis[this.active]) {
+          e.preventDefault();
+          this.choose(vis[this.active]);
+        }
+      } else if (e.key === 'Escape') {
+        this.close();
+      } else if (e.key === 'Tab') {
+        this.close();
+      }
+    }
+
+    private choose(li: HTMLLIElement) {
+      this.options.forEach((o) => o.setAttribute('aria-selected', 'false'));
+      li.setAttribute('aria-selected', 'true');
+
+      this.input.value = li.querySelector('.cb__optLabel')!.textContent ?? '';
+      this.valueInput.value = li.dataset.value!;
+      this.clearBtn.hidden = false;
+      this.close();
+      this.valueInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    private clear() {
+      this.input.value = '';
+      this.valueInput.value = '';
+      this.clearBtn.hidden = true;
+      this.options.forEach((o) => {
+        o.hidden = false;
+        o.setAttribute('aria-selected', 'false');
+      });
+      this.empty.hidden = true;
+      this.valueInput.dispatchEvent(new Event('change', { bubbles: true }));
+      this.input.focus();
+    }
+
+    /** Lets the ?for= handler preselect a venue programmatically. */
+    setValue(value: string) {
+      const li = this.options.find((o) => o.dataset.value === value);
+      if (li) this.choose(li);
+    }
+  }
+
+  if (!customElements.get('combo-box')) {
+    customElements.define('combo-box', ComboBox);
+  }
+</script>
+
+<style>
+  .cb {
+    display: block;
+    position: relative;
+    margin-bottom: 1.25rem;
+  }
+
+  .cb__label {
+    display: block;
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.55rem;
+  }
+
+  .cb__hint {
+    text-transform: none;
+    letter-spacing: 0.02em;
+    color: var(--ink-faint);
+    font-style: italic;
+    margin-left: 0.4rem;
+  }
+
+  .cb__shell {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .cb__input {
+    font: inherit;
+    font-size: 1rem;
+    width: 100%;
+    min-height: 46px;
+    padding: 0.85rem 2.75rem 0.85rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 0;
+    color: var(--ink);
+    transition: border-color 0.22s var(--ease);
+  }
+
+  .cb__input:focus {
+    outline: none;
+    border-color: var(--lake);
+  }
+
+  .cb__clear {
+    position: absolute;
+    right: 0.5rem;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 0;
+    color: var(--ink-faint);
+    cursor: pointer;
+  }
+
+  .cb__clear svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .cb__clear:hover {
+    color: var(--ink);
+  }
+
+  .cb__list {
+    position: absolute;
+    z-index: 30;
+    top: calc(100% + 0.3rem);
+    left: 0;
+    right: 0;
+    max-height: 16rem;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.3rem;
+    list-style: none;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    box-shadow: 0 18px 40px -20px rgb(26 24 21 / 0.28);
+  }
+
+  .cb__list[hidden] {
+    display: none;
+  }
+
+  .cb__option {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    min-height: 44px;
+    padding: 0.6rem 0.75rem;
+    cursor: pointer;
+  }
+
+  .cb__option[hidden] {
+    display: none;
+  }
+
+  .cb__option:hover,
+  .cb__option.is-active {
+    background: var(--paper-warm);
+  }
+
+  .cb__option[aria-selected='true'] {
+    background: var(--lake);
+    color: var(--paper);
+  }
+
+  .cb__optLabel {
+    font-size: 0.9375rem;
+  }
+
+  .cb__optMeta {
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+
+  .cb__option[aria-selected='true'] .cb__optMeta {
+    color: rgb(250 247 242 / 0.7);
+  }
+
+  .cb__empty {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--ink-faint);
+  }
+
+  .cb__empty[hidden] {
+    display: none;
+  }
+</style>

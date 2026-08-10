@@ -1,0 +1,310 @@
+---
+import Base from '../layouts/Base.astro';
+import DatePicker from '../components/form/DatePicker.astro';
+import Segmented from '../components/form/Segmented.astro';
+import Combobox from '../components/form/Combobox.astro';
+import { site } from '../data/site';
+import { services } from '../data/services';
+---
+
+<Base
+  title="Check your date — Karin Weddings & Events"
+  description="Tell Karin when, roughly how many, and what you need. A reply within one working day, with honest availability and cost."
+>
+  <section class="enq">
+    <div class="shell enq__shell">
+      <aside class="enq__aside">
+        <p class="eyebrow">Enquiry</p>
+        <h1 class="enq__title">Check your date</h1>
+        <p class="lead">
+          Four questions. I read these myself and reply within one working day — no brochure, no
+          automated sequence.
+        </p>
+
+        <ul class="enq__promises">
+          <li>An honest answer on whether your date still works</li>
+          <li>A real cost range before you commit to anything</li>
+          <li>No follow-up if you decide against it</li>
+        </ul>
+
+        <div class="enq__direct">
+          <p class="enq__directLabel">Or reach me directly</p>
+          <a href={`mailto:${site.email}`}>{site.email}</a>
+          <a href={`tel:${site.phoneHref}`}>{site.phone}</a>
+          <p class="enq__langs">Slovenian · English · Deutsch</p>
+        </div>
+      </aside>
+
+      <form class="form" id="enquiry-form" novalidate>
+        <div class="form__row">
+          <div class="field">
+            <label for="name">Your names</label>
+            <input id="name" name="name" type="text" autocomplete="name" required />
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="email" required />
+          </div>
+        </div>
+
+        <DatePicker name="date" label="Your date" />
+
+        <Segmented
+          name="flexible"
+          legend="Is the date movable?"
+          value="week"
+          options={[
+            { value: 'fixed', label: 'Fixed', note: 'that day only' },
+            { value: 'week', label: '± a week' },
+            { value: 'month', label: '± a month' },
+            { value: 'open', label: 'Open' },
+          ]}
+        />
+
+        <Segmented
+          name="guests"
+          legend="Roughly how many guests"
+          value="80"
+          options={[
+            { value: '2', label: 'Just us' },
+            { value: '30', label: 'To 40' },
+            { value: '80', label: '40–100' },
+            { value: '140', label: '100–150' },
+            { value: '200', label: '150+' },
+          ]}
+        />
+
+        <Combobox
+          name="service"
+          label="What do you need"
+          hint="optional"
+          placeholder="Search services, or leave blank"
+          options={services.map((s) => ({
+            value: s.slug,
+            label: s.name,
+            meta: `from €${s.priceFrom.toLocaleString('en-GB')}`,
+          }))}
+        />
+
+        <div class="field">
+          <label for="message">Anything else I should know</label>
+          <textarea id="message" name="message" rows="4"></textarea>
+        </div>
+
+        <output class="form__feedback" id="feedback" aria-live="polite" hidden></output>
+
+        <button class="btn form__submit" type="submit">Send enquiry</button>
+
+        <p class="form__legal">
+          Demo form — submissions are logged to the browser console rather than sent.
+        </p>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { qualifyLead, type EnquiryInput } from '../lib/qualify';
+
+  const form = document.querySelector<HTMLFormElement>('#enquiry-form');
+  const feedback = document.querySelector<HTMLOutputElement>('#feedback');
+
+  // Service pages link here as /enquire/?for=<slug>; carry the choice across.
+  const wanted = new URLSearchParams(location.search).get('for');
+  if (wanted) {
+    customElements.whenDefined('combo-box').then(() => {
+      document
+        .querySelectorAll<HTMLElement & { setValue?(v: string): void }>('combo-box')
+        .forEach((cb) => cb.setValue?.(wanted));
+    });
+  }
+
+  function readForm(f: HTMLFormElement): EnquiryInput {
+    const data = new FormData(f);
+    return {
+      name: String(data.get('name') ?? ''),
+      email: String(data.get('email') ?? ''),
+      date: String(data.get('date') ?? ''),
+      flexibility: String(data.get('flexible') ?? 'week') as EnquiryInput['flexibility'],
+      guests: Number(data.get('guests') ?? 0),
+      serviceSlug: String(data.get('service') ?? '') || null,
+      message: String(data.get('message') ?? ''),
+    };
+  }
+
+  // Live feedback while they fill it in — the useful moment is before send.
+  form?.addEventListener('change', () => {
+    const result = qualifyLead(readForm(form));
+    if (!feedback) return;
+    if (result.noticeForCouple) {
+      feedback.textContent = result.noticeForCouple;
+      feedback.hidden = false;
+    } else {
+      feedback.hidden = true;
+    }
+  });
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = readForm(form);
+    const result = qualifyLead(input);
+    console.log('[enquiry]', { input, result });
+    if (feedback) {
+      feedback.textContent =
+        result.noticeForCouple ?? 'Thank you — Karin will reply within one working day.';
+      feedback.hidden = false;
+    }
+  });
+</script>
+
+<style>
+  .enq__shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(2.5rem, 6vw, 5.5rem);
+    align-items: start;
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+  }
+
+  .enq__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .enq__promises {
+    list-style: none;
+    margin: 2.25rem 0;
+    padding: 0;
+  }
+
+  .enq__promises li {
+    padding-block: 0.85rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+  }
+
+  .enq__promises li:last-child {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .enq__directLabel {
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+  }
+
+  .enq__direct a {
+    display: block;
+    font-family: var(--display);
+    font-size: 1.125rem;
+    text-decoration: none;
+    padding-block: 0.15rem;
+  }
+
+  .enq__direct a:hover {
+    color: var(--terracotta);
+  }
+
+  .enq__langs {
+    margin-top: 0.85rem;
+    font-size: var(--fs-small);
+    color: var(--ink-faint);
+    letter-spacing: 0.06em;
+  }
+
+  .form {
+    background: var(--paper-deep);
+    padding: clamp(1.75rem, 4vw, 2.75rem);
+    border-radius: 6px;
+  }
+
+  .form__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .field {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .field label {
+    font-size: 0.6875rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.55rem;
+    font-weight: 600;
+  }
+
+  .field input,
+  .field textarea {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    width: 100%;
+    min-height: 48px;
+    transition: border-color 0.25s var(--ease);
+  }
+
+  .field textarea {
+    resize: vertical;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    border-color: var(--terracotta);
+    outline: none;
+  }
+
+  .form__feedback {
+    display: block;
+    background: var(--paper);
+    border-left: 2px solid var(--terracotta);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    border-radius: 0 4px 4px 0;
+  }
+
+  .form__feedback[hidden] {
+    display: none;
+  }
+
+  .form__submit {
+    width: 100%;
+  }
+
+  .form__legal {
+    font-size: var(--fs-small);
+    color: var(--ink-faint);
+    font-style: italic;
+    text-align: center;
+    margin: 1rem 0 0;
+  }
+
+  @media (max-width: 900px) {
+    .enq__shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .form__row {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+  }
+</style>

@@ -1,0 +1,213 @@
+---
+import { site } from '../data/site';
+import { url } from '../lib/url';
+
+interface Props {
+  overlay?: boolean;
+}
+const { overlay = false } = Astro.props;
+
+const links = [
+  { href: url('/#process'), label: 'How it works' },
+  { href: url('/services/full-planning/'), label: 'Services' },
+  { href: url('/work/kelly-and-ervin/'), label: 'Weddings' },
+  { href: url('/#about'), label: 'About Karin' },
+];
+
+/**
+ * Language switcher. The live site uses two tiny flag icons — flags are
+ * countries, not languages, and German is read in Austria and Switzerland
+ * too. Text codes with real labels instead.
+ */
+const langs = [
+  { code: 'EN', label: 'English', href: url('/'), current: true },
+  { code: 'SL', label: 'Slovenščina', href: url('/'), current: false },
+  { code: 'DE', label: 'Deutsch', href: url('/'), current: false },
+];
+---
+
+<header class:list={['nav', { 'nav--overlay': overlay }]} data-nav>
+  <div class="nav__inner">
+    <a href={url('/')} class="nav__mark" aria-label={`${site.name} — home`}>
+      <span class="script">Karin</span>
+      <span class="nav__markSub">Weddings &amp; Events</span>
+    </a>
+
+    <nav class="nav__links" aria-label="Primary">
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </nav>
+
+    <div class="nav__right">
+      <ul class="nav__langs" aria-label="Language">
+        {
+          langs.map((l) => (
+            <li>
+              <a
+                href={l.href}
+                lang={l.code.toLowerCase()}
+                aria-current={l.current ? 'true' : undefined}
+                title={l.label}
+              >
+                <span aria-hidden="true">{l.code}</span>
+                <span class="sr-only">{l.label}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <a href={url('/enquire/')} class="btn nav__cta">Check your date</a>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* Positioning is owned by .topbar in global.css — the nav only styles
+     itself, so the banner above it can never be overlapped. */
+  .nav {
+    position: relative;
+    background: var(--paper);
+    border-bottom: 1px solid transparent;
+    transition: background 0.35s var(--ease), border-color 0.35s var(--ease);
+  }
+
+  .nav--overlay {
+    background: transparent;
+    color: var(--paper);
+  }
+
+  /* Hero photographs are not reliably dark at the top; a soft scrim keeps
+     the bar legible over any image and fades once it goes solid. */
+  .nav--overlay::before {
+    content: '';
+    position: absolute;
+    inset: -0.5rem 0 auto 0;
+    height: 260%;
+    background: linear-gradient(to bottom, rgb(42 35 32 / 0.5), rgb(42 35 32 / 0));
+    pointer-events: none;
+    transition: opacity 0.4s var(--ease);
+  }
+
+  .nav--overlay.is-stuck::before {
+    opacity: 0;
+  }
+
+  .nav--overlay.is-stuck {
+    background: var(--paper);
+    color: var(--ink);
+    border-bottom-color: var(--rule);
+  }
+
+  .nav:not(.nav--overlay).is-stuck {
+    border-bottom-color: var(--rule);
+  }
+
+  .nav__inner {
+    position: relative;
+    max-width: var(--shell);
+    margin-inline: auto;
+    padding: 1rem var(--gutter);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .nav__mark {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .nav__mark .script {
+    font-size: 1.75rem;
+  }
+
+  .nav__markSub {
+    font-size: 0.5625rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    opacity: 0.62;
+    margin-top: 0.3rem;
+  }
+
+  .nav__links {
+    display: flex;
+    justify-content: center;
+    gap: clamp(1.25rem, 2.6vw, 2.5rem);
+  }
+
+  .nav__links a {
+    font-size: 0.9375rem;
+    text-decoration: none;
+    opacity: 0.8;
+    transition: opacity 0.25s var(--ease);
+  }
+
+  .nav__links a:hover {
+    opacity: 1;
+  }
+
+  .nav__right {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+
+  .nav__langs {
+    display: flex;
+    gap: 0.15rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav__langs a {
+    display: grid;
+    place-items: center;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    text-decoration: none;
+    opacity: 0.5;
+    border-radius: 999px;
+    transition: opacity 0.25s var(--ease), background 0.25s var(--ease);
+  }
+
+  .nav__langs a:hover {
+    opacity: 1;
+    background: rgb(0 0 0 / 0.05);
+  }
+
+  .nav__langs a[aria-current='true'] {
+    opacity: 1;
+    background: var(--clay-soft);
+    color: var(--ink);
+  }
+
+  .nav__cta {
+    padding: 0.7rem 1.4rem;
+    min-height: 42px;
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 1000px) {
+    .nav__links {
+      display: none;
+    }
+    .nav__inner {
+      grid-template-columns: 1fr auto;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .nav__langs {
+      display: none;
+    }
+    .nav__mark .script {
+      font-size: 1.5rem;
+    }
+  }
+</style>

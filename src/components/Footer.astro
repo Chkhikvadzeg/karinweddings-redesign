@@ -1,0 +1,156 @@
+---
+import { site } from '../data/site';
+import { services } from '../data/services';
+import { work } from '../data/work';
+import { url } from '../lib/url';
+---
+
+<footer class="foot">
+  <div class="shell">
+    <div class="foot__top">
+      <div class="foot__brand">
+        <p class="foot__mark"><span class="script">Karin</span></p>
+        <p class="foot__line">
+          {site.weddingsPlanned} weddings. Slovenian, English and German.
+        </p>
+        <a class="foot__contact" href={`mailto:${site.email}`}>{site.email}</a>
+        <a class="foot__contact" href={`tel:${site.phoneHref}`}>{site.phone}</a>
+      </div>
+
+      <div class="foot__col">
+        <h2>Services</h2>
+        <ul>
+          {services.map((s) => <li><a href={url(`/services/${s.slug}/`)}>{s.name}</a></li>)}
+        </ul>
+      </div>
+
+      <div class="foot__col">
+        <h2>Weddings</h2>
+        <ul>
+          {work.map((w) => <li><a href={url(`/work/${w.slug}/`)}>{w.couple}</a></li>)}
+          <li><a href={url('/#process')}>How it works</a></li>
+        </ul>
+      </div>
+
+      <div class="foot__col">
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href={site.social.instagram}>Instagram</a></li>
+          <li><a href={site.social.facebook}>Facebook</a></li>
+          <li><a href={site.social.tiktok}>TikTok</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot__bottom">
+      <p>{site.legalName} · Tax {site.taxNumber}</p>
+      {
+        site.pricesArePlaceholder && (
+          <p class="foot__note">Design demo — figures shown are placeholders.</p>
+        )
+      }
+    </div>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    background: var(--ink);
+    color: var(--paper);
+    padding-block: clamp(3.5rem, 8vw, 6rem) 2.25rem;
+  }
+
+  .foot__top {
+    display: grid;
+    grid-template-columns: 1.6fr repeat(3, 1fr);
+    gap: clamp(2rem, 4vw, 4rem);
+  }
+
+  .foot__mark {
+    margin: 0 0 0.75rem;
+  }
+
+  .foot__mark .script {
+    font-size: 2.25rem;
+  }
+
+  .foot__line {
+    color: rgb(251 248 244 / 0.55);
+    max-width: 22rem;
+    font-size: 0.9375rem;
+  }
+
+  .foot__contact {
+    display: block;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    color: rgb(251 248 244 / 0.85);
+    padding-block: 0.15rem;
+  }
+
+  .foot__contact:hover {
+    color: var(--paper);
+    text-decoration: underline;
+  }
+
+  .foot__col h2 {
+    font-family: var(--sans);
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgb(251 248 244 / 0.4);
+    margin: 0 0 1.15rem;
+    font-weight: 600;
+  }
+
+  .foot__col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .foot__col li + li {
+    margin-top: 0.5rem;
+  }
+
+  .foot__col a {
+    text-decoration: none;
+    font-size: 0.9375rem;
+    color: rgb(251 248 244 / 0.72);
+    transition: color 0.25s var(--ease);
+  }
+
+  .foot__col a:hover {
+    color: var(--paper);
+  }
+
+  .foot__bottom {
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    padding-top: 1.6rem;
+    border-top: 1px solid rgb(251 248 244 / 0.13);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: var(--fs-small);
+    color: rgb(251 248 244 / 0.45);
+  }
+
+  .foot__bottom p {
+    margin: 0;
+  }
+
+  .foot__note {
+    font-style: italic;
+  }
+
+  @media (max-width: 860px) {
+    .foot__top {
+      grid-template-columns: 1fr 1fr;
+    }
+    .foot__brand {
+      grid-column: 1 / -1;
+      margin-bottom: 1rem;
+    }
+  }
+</style>

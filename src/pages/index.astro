@@ -1,0 +1,543 @@
+---
+import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import ProcessSpine from '../components/ProcessSpine.astro';
+import Faq from '../components/Faq.astro';
+import EnquiryCta from '../components/EnquiryCta.astro';
+import { site, testimonials, aboutParagraphs } from '../data/site';
+import { services } from '../data/services';
+import { work } from '../data/work';
+import { photo } from '../lib/images';
+import { url } from '../lib/url';
+
+const lead = testimonials[0];
+---
+
+<Base
+  title="Karin Weddings & Events — Wedding Planner, Slovenia"
+  description="Wedding planning across Slovenia by Karin Čemažar. 200+ weddings, working in Slovenian, English and German. You get married; I run the day."
+  navOverlay
+>
+  <!-- ── Hero: full-bleed photograph of Karin at work ────────────────── -->
+  <section class="hero">
+    <Pic
+      class="hero__img"
+      src={photo('karin-working')}
+      alt="Karin adjusting a bride's veil on a clifftop terrace above the lake"
+      widths={[720, 1200, 1800]}
+      sizes="100vw"
+      priority
+    />
+    <div class="hero__scrim"></div>
+
+    <div class="shell hero__inner">
+      <p class="hero__kicker">Wedding planner · Slovenia</p>
+      <h1 class="hero__h1">
+        You get married.<br />
+        <span class="script">I run the day.</span>
+      </h1>
+      <p class="hero__lead">
+        {site.weddingsPlanned} weddings planned across Slovenia — in Slovenian, English and German.
+      </p>
+      <div class="hero__actions">
+        <a href={url('/enquire/')} class="btn">Check your date</a>
+        <a href="#process" class="hero__secondary">See how it works</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── The promise, in her reviewers' words ────────────────────────── -->
+  <section class="band band--clay section quote-lead">
+    <div class="shell">
+      <figure class="qlead" data-reveal>
+        <blockquote>{lead.quote}</blockquote>
+        <figcaption>{lead.author}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <ProcessSpine />
+
+  <!-- ── Services ────────────────────────────────────────────────────── -->
+  <section class="section services" id="services">
+    <div class="shell">
+      <header class="services__head" data-reveal>
+        <p class="eyebrow">Ways to work together</p>
+        <h2 class="services__title">Four ways in</h2>
+        <p class="lead">
+          Everything from "handle all of it" to "I planned it myself, please just make Saturday
+          work." Prices are honest starting points, not brochure numbers.
+        </p>
+      </header>
+
+      <ul class="scards">
+        {
+          services.map((s, i) => (
+            <li class:list={['scard', { 'scard--featured': s.featured }]} data-reveal data-reveal-delay={i * 70}>
+              <a class="scard__link" href={url(`/services/${s.slug}/`)}>
+                <div class="scard__img">
+                  <Pic
+                    src={photo(s.photo)}
+                    alt=""
+                    decorative
+                    widths={[420, 840]}
+                    sizes="(max-width: 900px) 90vw, 24vw"
+                  />
+                </div>
+                <div class="scard__body">
+                  <h3 class="scard__name">{s.name}</h3>
+                  <p class="scard__tagline">{s.tagline}</p>
+                  <p class="scard__foot">
+                    <span>{s.bestFor}</span>
+                    <span class="scard__price">from €{s.priceFrom.toLocaleString('en-GB')}</span>
+                  </p>
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── Work ────────────────────────────────────────────────────────── -->
+  <section class="band band--deep section work" id="work">
+    <div class="shell">
+      <header class="work__head" data-reveal>
+        <p class="eyebrow">Weddings I have run</p>
+        <h2 class="work__title">Not a gallery</h2>
+        <p class="lead">
+          Photographs are easy to find. What you actually want to know is what went wrong and who
+          fixed it. Each of these is the whole story.
+        </p>
+      </header>
+
+      <div class="wgrid">
+        {
+          work.map((w, i) => (
+            <article class="wcard" data-reveal data-reveal-delay={i * 90}>
+              <a class="wcard__link" href={url(`/work/${w.slug}/`)}>
+                <div class="wcard__img">
+                  <Pic
+                    src={photo(w.photo)}
+                    alt=""
+                    decorative
+                    widths={[500, 1000]}
+                    sizes="(max-width: 900px) 90vw, 31vw"
+                  />
+                </div>
+                <p class="wcard__meta">
+                  {w.venue} · {w.season} · {w.guests === 2 ? 'just the two of them' : `${w.guests} guests`}
+                </p>
+                <h3 class="wcard__couple">{w.couple}</h3>
+                <p class="wcard__challenge">{w.challenge}</p>
+                <span class="textlink">Read the story →</span>
+              </a>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ── About ───────────────────────────────────────────────────────── -->
+  <section class="section about" id="about">
+    <div class="shell about__shell">
+      <figure class="about__figure" data-reveal>
+        <Pic
+          src={photo('organizator-porok-karin')}
+          alt="Karin Čemažar, wedding planner"
+          widths={[520, 1040]}
+          sizes="(max-width: 900px) 90vw, 42vw"
+        />
+      </figure>
+
+      <div class="about__type" data-reveal data-reveal-delay="120">
+        <p class="eyebrow">The planner</p>
+        <h2 class="about__title">I have always been like this</h2>
+        {aboutParagraphs.map((p) => <p class="about__para">{p}</p>)}
+        <a class="textlink" href={url('/enquire/')}>Talk to me →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Testimonials ────────────────────────────────────────────────── -->
+  <section class="band band--ink section quotes">
+    <div class="shell">
+      <p class="eyebrow quotes__eyebrow" data-reveal>In their words</p>
+      <div class="quotes__grid">
+        {
+          testimonials.slice(1).map((t, i) => (
+            <figure class="quote" data-reveal data-reveal-delay={i * 90}>
+              <blockquote>{t.quote}</blockquote>
+              <p class="quote__detail">{t.detail}</p>
+              <figcaption>{t.author}</figcaption>
+            </figure>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <Faq />
+  <EnquiryCta />
+</Base>
+
+<style>
+  /* ── Hero ─────────────────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    min-height: min(92svh, 860px);
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: clamp(3rem, 8vw, 6.5rem);
+    overflow: hidden;
+  }
+
+  .hero :global(.hero__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero__scrim {
+    position: absolute;
+    inset: 0;
+    /* Weighted to the bottom so the headline has contrast without
+       flattening the photograph — her images are her strongest asset. */
+    background: linear-gradient(
+      to top,
+      rgb(42 35 32 / 0.82) 0%,
+      rgb(42 35 32 / 0.45) 34%,
+      rgb(42 35 32 / 0.06) 68%,
+      rgb(42 35 32 / 0.22) 100%
+    );
+  }
+
+  .hero__inner {
+    position: relative;
+    width: 100%;
+    color: var(--paper);
+  }
+
+  .hero__kicker {
+    font-size: var(--fs-small);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  .hero__h1 {
+    font-size: var(--fs-hero);
+    line-height: 1;
+    letter-spacing: -0.025em;
+    margin-bottom: 1.35rem;
+    max-width: 16ch;
+  }
+
+  .hero__h1 .script {
+    color: var(--clay);
+  }
+
+  .hero__lead {
+    font-size: var(--fs-lead);
+    color: rgb(251 248 244 / 0.88);
+    max-width: 34rem;
+    margin-bottom: 2.25rem;
+  }
+
+  .hero__actions {
+    display: flex;
+    align-items: center;
+    gap: clamp(1.25rem, 3vw, 2rem);
+    flex-wrap: wrap;
+  }
+
+  .hero__secondary {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--paper);
+    text-decoration: none;
+    border-bottom: 1px solid rgb(251 248 244 / 0.45);
+    padding-bottom: 0.25rem;
+    transition: border-color 0.3s var(--ease);
+  }
+
+  .hero__secondary:hover {
+    border-color: var(--paper);
+  }
+
+  /* ── Lead quote ───────────────────────────────────────────────────── */
+  .qlead {
+    margin: 0;
+    max-width: 52rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .qlead blockquote {
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1;
+    font-size: clamp(1.375rem, 2.9vw, 2.25rem);
+    line-height: 1.3;
+    margin: 0 0 1.5rem;
+    text-wrap: balance;
+  }
+
+  .qlead figcaption {
+    font-size: var(--fs-small);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* ── Services ─────────────────────────────────────────────────────── */
+  .services__head {
+    max-width: 44rem;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .services__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .scards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(1.25rem, 2.5vw, 2rem);
+  }
+
+  .scard__link {
+    display: block;
+    text-decoration: none;
+    height: 100%;
+  }
+
+  .scard__img {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 1.15rem;
+  }
+
+  .scard__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+
+  .scard__link:hover .scard__img :global(img) {
+    transform: scale(1.04);
+  }
+
+  .scard__name {
+    font-size: 1.375rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .scard__tagline {
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+  }
+
+  .scard__foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--rule);
+    font-size: var(--fs-small);
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  .scard__price {
+    color: var(--terracotta);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .scard--featured .scard__name::after {
+    content: 'Most chosen';
+    display: inline-block;
+    margin-left: 0.6rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--clay-soft);
+    color: var(--ink-soft);
+    font-family: var(--sans);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    vertical-align: middle;
+    font-weight: 600;
+  }
+
+  @media (max-width: 1100px) {
+    .scards {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .scards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Work ─────────────────────────────────────────────────────────── */
+  .work__head {
+    max-width: 44rem;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .work__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .wgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .wcard__link {
+    text-decoration: none;
+    display: block;
+  }
+
+  .wcard__img {
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 1.15rem;
+  }
+
+  .wcard__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+
+  .wcard__link:hover .wcard__img :global(img) {
+    transform: scale(1.04);
+  }
+
+  .wcard__meta {
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 0.5rem;
+  }
+
+  .wcard__couple {
+    font-size: 1.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .wcard__challenge {
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 900px) {
+    .wgrid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── About ────────────────────────────────────────────────────────── */
+  .about__shell {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 6vw, 5.5rem);
+    align-items: center;
+  }
+
+  .about__figure {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .about__figure :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .about__title {
+    font-size: var(--fs-title);
+    margin-bottom: 1.5rem;
+  }
+
+  .about__para {
+    color: var(--ink-soft);
+    max-width: 38rem;
+  }
+
+  @media (max-width: 900px) {
+    .about__shell {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Quotes ───────────────────────────────────────────────────────── */
+  .quotes__eyebrow {
+    color: var(--clay);
+  }
+
+  .quotes__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .quote {
+    margin: 0;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgb(251 248 244 / 0.18);
+  }
+
+  .quote blockquote {
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1;
+    font-size: 1.1875rem;
+    line-height: 1.42;
+    margin: 0 0 1rem;
+  }
+
+  .quote__detail {
+    font-size: 0.9375rem;
+    color: rgb(251 248 244 / 0.6);
+    margin-bottom: 1.25rem;
+  }
+
+  .quote figcaption {
+    font-size: var(--fs-small);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(251 248 244 / 0.45);
+  }
+
+  @media (max-width: 900px) {
+    .quotes__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
