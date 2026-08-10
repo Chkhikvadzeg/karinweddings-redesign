@@ -141,6 +141,28 @@ them would look wrong even to someone who could not say why.
 **Not built:** Reviews page, full Portfolio index, and the Slovenian and German
 translations. The routing supports them; see Languages below.
 
+### Not only weddings
+
+Her live site's "What can I organize?" menu lists five categories — baby
+showers, bachelorette parties, birthdays, engagements, and **weddings last**.
+The first pass of this redesign compressed four of those into a single service
+card, because that section renders blank in desktop screenshots (lazy images
+with no reserved space) and I never saw its contents.
+
+`WhatIOrganise.astro` now gives all five real presence in her order, using the
+swatches sampled from her own buttons — navy `#23303c`, clay `#ded5c8`,
+blue-grey `#96aab3`, rust `#8f5437`.
+
+**With one correction.** Her site sets white text on all five swatches. On the
+three light ones that is roughly 1.5:1 (clay) and 2.3:1 (blue-grey) against a
+4.5:1 minimum. Here those three carry dark ink instead. Her blocks are also not
+links — they name a service and offer nowhere to go; these each point at a
+service page or a real gallery of that kind of event.
+
+The positioning is still weddings-led, which is where the budgets and the
+search demand are. If Karin wants true parity — her own site puts weddings
+last — that is a further step, not a bug.
+
 ### The two structural bets
 
 **1. A process spine, not a gallery.** Her own copy and every one of her

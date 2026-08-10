@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Pic from '../components/Pic.astro';
 import ProcessSpine from '../components/ProcessSpine.astro';
 import ReachMap from '../components/ReachMap.astro';
+import WhatIOrganise from '../components/WhatIOrganise.astro';
 import heroWide from '../assets/gen/hero-wide.png';
 import Faq from '../components/Faq.astro';
 import EnquiryCta from '../components/EnquiryCta.astro';
@@ -39,7 +40,8 @@ const lead = testimonials[0];
         <span class="script">I run the day.</span>
       </h1>
       <p class="hero__lead">
-        {site.weddingsPlanned} weddings planned across Slovenia — in Slovenian, English and German.
+        {site.weddingsPlanned} weddings, plus the engagements, showers and parties around them —
+        across Slovenia, in Slovenian, English and German.
       </p>
       <div class="hero__actions">
         <a href={url('/enquire/')} class="btn">Check your date</a>
@@ -59,6 +61,7 @@ const lead = testimonials[0];
   </section>
 
   <ProcessSpine />
+  <WhatIOrganise />
   <ReachMap />
 
   <!-- ── Services ────────────────────────────────────────────────────── -->

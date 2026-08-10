@@ -1,0 +1,130 @@
+---
+import { celebrations } from '../data/celebrations';
+import { galleries } from '../data/galleries';
+import { url } from '../lib/url';
+
+/**
+ * Her five service categories, in her order.
+ *
+ * The live site presents these as five stacked colour blocks that are not
+ * links — they name the service and then offer nowhere to go. Here each one
+ * points at either the relevant service page or a real gallery of that kind
+ * of event.
+ */
+const target = (c: (typeof celebrations)[number]) => {
+  if (c.slug === 'weddings') return url('/services/full-planning/');
+  if (c.gallerySlug && galleries.some((g) => g.slug === c.gallerySlug))
+    return url(`/portfolio/${c.gallerySlug}/`);
+  return url('/services/celebrations/');
+};
+---
+
+<section class="section organise" id="organise">
+  <div class="shell">
+    <header class="organise__head" data-reveal>
+      <p class="eyebrow">What I organise</p>
+      <h2 class="organise__title">Not only weddings</h2>
+      <p class="lead">
+        Weddings are most of my work, but they are not all of it. Proposals, bachelorette weekends,
+        baby showers and the birthdays people actually remember — same approach, different scale.
+      </p>
+    </header>
+
+    <ul class="organise__grid">
+      {
+        celebrations.map((c, i) => (
+          <li class="cel" data-reveal data-reveal-delay={i * 60}>
+            <a
+              class:list={['cel__link', { 'cel__link--ink': c.ink }]}
+              style={`--swatch:${c.colour}`}
+              href={target(c)}
+            >
+              <span class="cel__name">{c.name}</span>
+              <span class="cel__blurb">{c.blurb}</span>
+              <span class="cel__go" aria-hidden="true">→</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .organise__head {
+    max-width: 44rem;
+    margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+  }
+
+  .organise__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .organise__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .cel__link {
+    display: grid;
+    grid-template-columns: minmax(0, 14rem) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1.5rem;
+    background: var(--swatch);
+    color: var(--paper);
+    text-decoration: none;
+    padding: clamp(1.15rem, 2.2vw, 1.6rem) clamp(1.25rem, 2.5vw, 2rem);
+    border-radius: 4px;
+    transition: transform 0.35s var(--ease), filter 0.35s var(--ease);
+  }
+
+  /* Her site puts white on every swatch; on the three light ones that is
+     roughly 1.5–2.3:1. Dark ink on those clears 4.5:1 comfortably. */
+  .cel__link--ink {
+    color: var(--ink);
+  }
+
+  .cel__link:hover {
+    transform: translateX(6px);
+    filter: brightness(1.04);
+  }
+
+  .cel__name {
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 30, 'WONK' 1;
+    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+    line-height: 1.15;
+  }
+
+  .cel__blurb {
+    font-size: 0.9375rem;
+    opacity: 0.85;
+  }
+
+  .cel__go {
+    font-size: 1.125rem;
+    opacity: 0.7;
+  }
+
+  @media (max-width: 760px) {
+    .cel__link {
+      grid-template-columns: 1fr auto;
+      gap: 0.3rem 1rem;
+    }
+    .cel__name {
+      grid-column: 1;
+    }
+    .cel__blurb {
+      grid-column: 1;
+    }
+    .cel__go {
+      grid-row: 1 / span 2;
+      grid-column: 2;
+      align-self: center;
+    }
+  }
+</style>
