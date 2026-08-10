@@ -1,0 +1,203 @@
+---
+import Pic from './Pic.astro';
+import { photo } from '../lib/images';
+import { url } from '../lib/url';
+import { site } from '../data/site';
+import heroWide from '../assets/gen/hero-wide.png';
+
+/**
+ * Two-door hero.
+ *
+ * Her business is "Weddings & Events" and her own service menu lists weddings
+ * last of five. A single wedding headline made four fifths of her offer
+ * invisible above the fold, so the hero forks instead: two real doors, equal
+ * weight, each with its own photograph and its own promise.
+ *
+ * The trade is deliberate and worth naming — a forked hero sells each side
+ * slightly less hard than a single-minded one would. Parity across the
+ * business was judged worth more.
+ */
+const doors = [
+  {
+    kicker: 'Weddings',
+    line: 'You get married.',
+    lineEm: 'I run the day.',
+    blurb: `${site.weddingsPlanned} weddings across Slovenia — full planning, partial, or just the day itself.`,
+    cta: 'Plan a wedding',
+    href: url('/weddings/'),
+    img: heroWide,
+    alt: "Karin releasing a bride's veil into the wind on a terrace above Lake Bled",
+    tone: 'dark',
+  },
+  {
+    kicker: 'Everything else',
+    line: 'Or something',
+    lineEm: 'worth marking.',
+    blurb:
+      'Proposals, bachelorette weekends, baby showers and the birthdays people actually remember.',
+    cta: 'Plan an event',
+    href: url('/events/'),
+    img: photo('anina-dekliscina--rimske-terme-vse-samo-rovan-001'),
+    alt: 'A bachelorette party toasting with sparklers and balloons',
+    tone: 'warm',
+  },
+];
+---
+
+<section class="doors" aria-labelledby="doors-title">
+  {/* Two doors of equal weight cannot both be the page heading. One real h1
+      names the page for assistive tech and search; the doors are h2s. This is
+      exactly the duplicate-h1 defect the live site has, and it is easy to
+      recreate accidentally. */}
+  <h1 id="doors-title" class="sr-only">
+    Karin Weddings &amp; Events — wedding and event planning across Slovenia
+  </h1>
+  {
+    doors.map((d, i) => (
+      <article class:list={['door', `door--${d.tone}`]}>
+        <Pic
+          class="door__img"
+          src={d.img}
+          alt={d.alt}
+          widths={[640, 1000, 1600]}
+          sizes="(max-width: 900px) 100vw, 50vw"
+          {/* Both doors are above the fold — lazy-loading the second one
+              leaves half the hero grey until it arrives. */}
+          priority
+        />
+        <div class="door__scrim" />
+        <div class="door__body">
+          <p class="door__kicker">{d.kicker}</p>
+          <h2 class="door__line">
+            {d.line}
+            <br />
+            <span class="script">{d.lineEm}</span>
+          </h2>
+          <p class="door__blurb">{d.blurb}</p>
+          <a class="btn door__cta" href={d.href}>
+            {d.cta}
+          </a>
+        </div>
+      </article>
+    ))
+  }
+</section>
+
+<style>
+  .doors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: min(92svh, 880px);
+  }
+
+  .door {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    padding: clamp(1.75rem, 4vw, 3.5rem);
+    padding-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .door :global(.door__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.1s var(--ease);
+  }
+
+  .door:hover :global(.door__img) {
+    transform: scale(1.03);
+  }
+
+  .door__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgb(42 35 32 / 0.86) 0%,
+      rgb(42 35 32 / 0.5) 38%,
+      rgb(42 35 32 / 0.1) 72%,
+      rgb(42 35 32 / 0.3) 100%
+    );
+  }
+
+  .door__body {
+    position: relative;
+    color: var(--paper);
+    max-width: 32rem;
+  }
+
+  .door__kicker {
+    font-size: var(--fs-small);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.85;
+    margin-bottom: 0.9rem;
+  }
+
+  .door__line {
+    /* Smaller than a single-hero headline would be — two of them share the
+       viewport, and both have to breathe. */
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.1rem;
+  }
+
+  .door__line .script {
+    color: var(--clay);
+  }
+
+  .door--warm .door__line .script {
+    color: #f0d9c6;
+  }
+
+  .door__blurb {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgb(251 248 244 / 0.88);
+    margin-bottom: 1.85rem;
+    max-width: 26rem;
+  }
+
+  .door--warm .door__cta {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+
+  .door--warm .door__cta:hover {
+    background: transparent;
+    color: var(--paper);
+  }
+
+  /* A hairline keeps the two panels from bleeding into one image. */
+  .door + .door::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 1px;
+    background: rgb(251 248 244 / 0.22);
+    z-index: 2;
+  }
+
+  @media (max-width: 900px) {
+    .doors {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .door {
+      min-height: 68svh;
+    }
+    .door + .door::before {
+      inset: 0 0 auto 0;
+      width: auto;
+      height: 1px;
+    }
+  }
+</style>

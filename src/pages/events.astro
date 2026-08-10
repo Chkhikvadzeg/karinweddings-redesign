@@ -1,0 +1,243 @@
+---
+import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import EnquiryCta from '../components/EnquiryCta.astro';
+import { celebrations } from '../data/celebrations';
+import { galleries } from '../data/galleries';
+import { photo } from '../lib/images';
+import { url } from '../lib/url';
+
+/**
+ * Events as a peer of weddings, not a footnote.
+ *
+ * Four of the five categories on her own menu are not weddings, and her menu
+ * lists weddings last. This page gives those four the same treatment the
+ * wedding side gets.
+ */
+const events = celebrations.filter((c) => c.slug !== 'weddings');
+
+const detail: Record<string, { long: string; from: number; lead: string[] }> = {
+  engagements: {
+    long: 'The hardest part of proposing somewhere beautiful is that you get one attempt, and you have probably never stood there at the hour you plan to do it. I scout the location for light and for footfall — the best view often has a coach party at four — set the timing, and put a photographer in position before you arrive.',
+    from: 650,
+    lead: ['Location scouted and timed', 'Photographer hidden in position', 'Flowers, styling, dinner booked'],
+  },
+  bachelorette: {
+    long: 'A whole weekend, not an evening. Accommodation, transport, a spa or a boat or a dinner that people talk about afterwards, and a schedule loose enough that nobody is being marched between activities. Most importantly: the bride is not organising her own party.',
+    from: 900,
+    lead: ['Accommodation and transport', 'Activities booked and paced', 'Decoration and the small surprises'],
+  },
+  'baby-showers': {
+    long: 'Small, warm, and organised by somebody who is not the mother — which is the entire point. Venue or home, a menu that works for someone who is thirty-six weeks pregnant, styling, and games only if you actually want them.',
+    from: 550,
+    lead: ['Venue or at home', 'Menu, cake and styling', 'Run on the day so she can sit down'],
+  },
+  birthdays: {
+    long: 'The milestone ones. A fortieth that is not a function room with balloons in it, a sixtieth that the family actually enjoys rather than endures. Venue, catering, music, and a running order that keeps the evening moving.',
+    from: 750,
+    lead: ['Venue, catering and music', 'A running order that works', 'Present and running it on the night'],
+  },
+};
+
+const galleryFor = (slug?: string) =>
+  slug && galleries.some((g) => g.slug === slug) ? galleries.find((g) => g.slug === slug)! : null;
+---
+
+<Base
+  title="Engagements, bachelorettes, showers & birthdays — Karin Weddings & Events"
+  description="Four of the five things Karin organises are not weddings. Proposals, bachelorette weekends, baby showers and milestone birthdays across Slovenia."
+>
+  <section class="ehead">
+    <div class="shell">
+      <p class="eyebrow">Events</p>
+      <h1 class="ehead__title">Four of the five things I do<br /><span class="script">are not weddings</span></h1>
+      <p class="lead">
+        Same planning, same suppliers, same person present on the day — at whatever scale the
+        occasion actually needs.
+      </p>
+    </div>
+  </section>
+
+  {
+    events.map((c, i) => {
+      const d = detail[c.slug];
+      const g = galleryFor(c.gallerySlug);
+      return (
+        <section class:list={['etype', { 'etype--alt': i % 2 === 1 }]} id={c.slug}>
+          <div class="shell etype__shell">
+            <div class="etype__type" data-reveal>
+              <span class="etype__swatch" style={`--swatch:${c.colour}`} aria-hidden="true" />
+              <h2 class="etype__name">{c.name}</h2>
+              <p class="etype__blurb">{c.blurb}</p>
+              <p class="etype__long">{d.long}</p>
+              <ul class="etype__list">
+                {d.lead.map((l) => <li>{l}</li>)}
+              </ul>
+              <p class="etype__price">
+                From €{d.from.toLocaleString('en-GB')}
+                <span>depending on scale</span>
+              </p>
+              <div class="etype__actions">
+                <a class="btn" href={url(`/enquire/?for=celebrations`)}>Ask about {c.name.toLowerCase()}</a>
+                {g && (
+                  <a class="textlink" href={url(`/portfolio/${g.slug}/`)}>
+                    See {g.title} →
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {g && (
+              <div class="etype__pics" data-reveal data-reveal-delay="100">
+                {g.photos.slice(0, 3).map((name, n) => (
+                  <figure class:list={['etype__pic', { 'etype__pic--tall': n === 0 }]}>
+                    <Pic
+                      src={photo(name)}
+                      alt={`${g.title}, photograph ${n + 1}`}
+                      widths={[400, 800]}
+                      sizes="(max-width: 900px) 45vw, 22vw"
+                    />
+                  </figure>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      );
+    })
+  }
+
+  <EnquiryCta context="celebrations" heading="Tell me what you are marking" />
+</Base>
+
+<style>
+  .ehead {
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .ehead__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .ehead__title .script {
+    color: var(--terracotta);
+  }
+
+  .etype {
+    padding-block: clamp(2.5rem, 6vw, 5rem);
+  }
+
+  .etype--alt {
+    background: var(--paper-deep);
+  }
+
+  .etype__shell {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: clamp(2rem, 5vw, 4.5rem);
+    align-items: center;
+  }
+
+  .etype--alt .etype__shell {
+    direction: rtl;
+  }
+
+  .etype--alt .etype__shell > * {
+    direction: ltr;
+  }
+
+  .etype__swatch {
+    display: block;
+    width: 44px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--swatch);
+    margin-bottom: 1.1rem;
+  }
+
+  .etype__name {
+    font-size: var(--fs-title);
+    margin-bottom: 0.75rem;
+  }
+
+  .etype__blurb {
+    font-family: var(--display);
+    font-size: 1.25rem;
+    color: var(--terracotta);
+    margin-bottom: 1.1rem;
+  }
+
+  .etype__long {
+    color: var(--ink-soft);
+    max-width: 34rem;
+  }
+
+  .etype__list {
+    list-style: none;
+    margin: 1.5rem 0;
+    padding: 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .etype__list li {
+    padding-block: 0.65rem;
+    border-bottom: 1px solid var(--rule);
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+  }
+
+  .etype__price {
+    font-family: var(--display);
+    font-size: 1.375rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .etype__price span {
+    display: block;
+    font-family: var(--sans);
+    font-size: var(--fs-small);
+    font-style: italic;
+    color: var(--ink-faint);
+  }
+
+  .etype__actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .etype__pics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .etype__pic {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 4px;
+    aspect-ratio: 1;
+  }
+
+  .etype__pic--tall {
+    grid-row: span 2;
+    aspect-ratio: 3 / 4;
+  }
+
+  .etype__pic :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 900px) {
+    .etype__shell {
+      grid-template-columns: 1fr;
+    }
+    .etype--alt .etype__shell {
+      direction: ltr;
+    }
+  }
+</style>

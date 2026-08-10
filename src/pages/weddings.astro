@@ -1,0 +1,263 @@
+---
+import Base from '../layouts/Base.astro';
+import Pic from '../components/Pic.astro';
+import ProcessSpine from '../components/ProcessSpine.astro';
+import EnquiryCta from '../components/EnquiryCta.astro';
+import { services } from '../data/services';
+import { work } from '../data/work';
+import { site, testimonials } from '../data/site';
+import { photo } from '../lib/images';
+import { url } from '../lib/url';
+
+// The wedding side of the fork. Everything wedding-specific lives here so the
+// homepage can hold the two doors evenly instead of leading with one.
+const weddingServices = services.filter((s) => s.slug !== 'celebrations');
+const lead = testimonials[0];
+---
+
+<Base
+  title="Wedding planning in Slovenia — Karin Weddings & Events"
+  description={`${site.weddingsPlanned} weddings planned across Slovenia. Full planning, partial planning, or day coordination — in Slovenian, English and German.`}
+>
+  <section class="whead">
+    <div class="shell">
+      <p class="eyebrow">Weddings</p>
+      <h1 class="whead__title">You get married.<br /><span class="script">I run the day.</span></h1>
+      <p class="lead">
+        {site.weddingsPlanned} weddings across Slovenia. Take the whole thing off my list, or just
+        the part you would rather not carry.
+      </p>
+    </div>
+  </section>
+
+  <section class="band band--clay section wquote">
+    <div class="shell">
+      <figure class="wquote__fig" data-reveal>
+        <blockquote>{lead.quote}</blockquote>
+        <figcaption>{lead.author}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section wservices">
+    <div class="shell">
+      <header data-reveal>
+        <p class="eyebrow">Ways to work together</p>
+        <h2 class="wservices__title">Three ways in</h2>
+      </header>
+
+      <ul class="wcards">
+        {
+          weddingServices.map((s, i) => (
+            <li class:list={['wcard', { 'wcard--featured': s.featured }]} data-reveal data-reveal-delay={i * 70}>
+              <a class="wcard__link" href={url(`/services/${s.slug}/`)}>
+                <div class="wcard__img">
+                  <Pic
+                    src={photo(s.photo)}
+                    alt=""
+                    decorative
+                    widths={[420, 840]}
+                    sizes="(max-width: 900px) 90vw, 31vw"
+                  />
+                </div>
+                <h3 class="wcard__name">{s.name}</h3>
+                <p class="wcard__tagline">{s.tagline}</p>
+                <p class="wcard__foot">
+                  <span>{s.bestFor}</span>
+                  <span class="wcard__price">from €{s.priceFrom.toLocaleString('en-GB')}</span>
+                </p>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <ProcessSpine />
+
+  <section class="band band--deep section wwork">
+    <div class="shell">
+      <header data-reveal>
+        <p class="eyebrow">Weddings I have run</p>
+        <h2 class="wwork__title">The whole story, not a gallery</h2>
+      </header>
+      <div class="wwork__grid">
+        {
+          work.map((w, i) => (
+            <article data-reveal data-reveal-delay={i * 80}>
+              <a class="owcard" href={url(`/work/${w.slug}/`)}>
+                <div class="owcard__img">
+                  <Pic
+                    src={photo(w.photo)}
+                    alt=""
+                    decorative
+                    widths={[460, 920]}
+                    sizes="(max-width: 900px) 90vw, 31vw"
+                  />
+                </div>
+                <h3 class="owcard__couple">{w.couple}</h3>
+                <p class="owcard__challenge">{w.challenge}</p>
+              </a>
+            </article>
+          ))
+        }
+      </div>
+      <p class="wwork__more" data-reveal>
+        <a class="textlink" href={url('/portfolio/')}>All galleries →</a>
+      </p>
+    </div>
+  </section>
+
+  <EnquiryCta heading="Is your date free?" />
+</Base>
+
+<style>
+  .whead {
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2rem, 4vw, 3rem);
+  }
+
+  .whead__title {
+    font-size: var(--fs-display);
+    margin-bottom: 1.25rem;
+  }
+
+  .whead__title .script {
+    color: var(--terracotta);
+  }
+
+  .wquote__fig {
+    margin: 0;
+    max-width: 50rem;
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  .wquote__fig blockquote {
+    font-family: var(--display);
+    font-variation-settings: 'SOFT' 40, 'WONK' 1;
+    font-size: clamp(1.25rem, 2.6vw, 2rem);
+    line-height: 1.32;
+    margin: 0 0 1.25rem;
+    text-wrap: balance;
+  }
+
+  .wquote__fig figcaption {
+    font-size: var(--fs-small);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .wservices__title,
+  .wwork__title {
+    font-size: var(--fs-display);
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+
+  .wcards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  }
+
+  .wcard__link {
+    text-decoration: none;
+    display: block;
+  }
+
+  .wcard__img {
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 1.15rem;
+  }
+
+  .wcard__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+
+  .wcard__link:hover .wcard__img :global(img) {
+    transform: scale(1.04);
+  }
+
+  .wcard__name {
+    font-size: 1.375rem;
+    margin-bottom: 0.35rem;
+  }
+
+  .wcard__tagline {
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+    margin-bottom: 1rem;
+  }
+
+  .wcard__foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--rule);
+    font-size: var(--fs-small);
+    color: var(--ink-faint);
+    margin: 0;
+  }
+
+  .wcard__price {
+    color: var(--terracotta);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .wwork__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .owcard {
+    text-decoration: none;
+    display: block;
+  }
+
+  .owcard__img {
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+
+  .owcard__img :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .owcard__couple {
+    font-size: 1.375rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .owcard__challenge {
+    font-size: 0.9375rem;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+
+  .wwork__more {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+
+  @media (max-width: 900px) {
+    .wcards,
+    .wwork__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

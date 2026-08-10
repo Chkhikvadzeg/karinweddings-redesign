@@ -12,10 +12,10 @@ import { url } from '../lib/url';
  * of event.
  */
 const target = (c: (typeof celebrations)[number]) => {
-  if (c.slug === 'weddings') return url('/services/full-planning/');
+  if (c.slug === 'weddings') return url('/weddings/');
   if (c.gallerySlug && galleries.some((g) => g.slug === c.gallerySlug))
     return url(`/portfolio/${c.gallerySlug}/`);
-  return url('/services/celebrations/');
+  return url(`/events/#${c.slug}`);
 };
 ---
 
@@ -23,7 +23,7 @@ const target = (c: (typeof celebrations)[number]) => {
   <div class="shell">
     <header class="organise__head" data-reveal>
       <p class="eyebrow">What I organise</p>
-      <h2 class="organise__title">Not only weddings</h2>
+      <h2 class="organise__title">The whole list</h2>
       <p class="lead">
         Weddings are most of my work, but they are not all of it. Proposals, bachelorette weekends,
         baby showers and the birthdays people actually remember — same approach, different scale.

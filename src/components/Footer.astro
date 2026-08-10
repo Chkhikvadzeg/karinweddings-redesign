@@ -22,18 +22,24 @@ import mark from '../assets/brand/karin-mark-ink.png';
       </div>
 
       <div class="foot__col">
-        <h2>Services</h2>
+        <h2>Weddings</h2>
         <ul>
-          {services.map((s) => <li><a href={url(`/services/${s.slug}/`)}>{s.name}</a></li>)}
+          <li><a href={url('/weddings/')}>Wedding planning</a></li>
+          {services.filter((s) => s.slug !== 'celebrations').map((s) => (
+            <li><a href={url(`/services/${s.slug}/`)}>{s.name}</a></li>
+          ))}
         </ul>
       </div>
 
       <div class="foot__col">
-        <h2>Weddings</h2>
+        <h2>Events</h2>
         <ul>
-          {work.map((w) => <li><a href={url(`/work/${w.slug}/`)}>{w.couple}</a></li>)}
+          <li><a href={url('/events/')}>All events</a></li>
+          <li><a href={url('/events/#engagements')}>Engagements</a></li>
+          <li><a href={url('/events/#bachelorette')}>Bachelorette parties</a></li>
+          <li><a href={url('/events/#baby-showers')}>Baby showers</a></li>
+          <li><a href={url('/events/#birthdays')}>Birthdays</a></li>
           <li><a href={url('/portfolio/')}>All galleries</a></li>
-          <li><a href={url('/#process')}>How it works</a></li>
         </ul>
       </div>
 
