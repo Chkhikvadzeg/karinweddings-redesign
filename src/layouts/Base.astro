@@ -6,6 +6,10 @@ import Footer from '../components/Footer.astro';
 import { site } from '../data/site';
 import { url } from '../lib/url';
 
+// process.env, not import.meta.env — Vite only exposes PUBLIC_-prefixed vars
+// there, so the flag silently never flipped and noindex was always emitted.
+const indexable = process.env.INDEXABLE === 'true';
+
 interface Props {
   title: string;
   description: string;
@@ -40,10 +44,9 @@ const schema = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
-    {/* Unsolicited redesign demo carrying a real business's name, contact
-        details and photography, plus placeholder pricing. Must never be
-        indexed — it would compete with the real site. */}
-    <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />
+    {/* Demo carries a real business's name, contact details, photography and
+        invented prices, so it ships noindex. INDEXABLE=true flips it. */}
+    {!indexable && <meta name="robots" content="noindex, nofollow, noarchive, noimageindex" />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />

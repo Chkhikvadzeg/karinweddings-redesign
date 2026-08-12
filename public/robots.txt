@@ -1,3 +1,0 @@
-# Redesign demo for karinweddingsevents.com — not the live site.
-User-agent: *
-Disallow: /

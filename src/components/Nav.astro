@@ -21,10 +21,18 @@ const links = [
  * countries, not languages, and German is read in Austria and Switzerland
  * too. Text codes with real labels instead.
  */
+/**
+ * Only English exists. Previously SL and DE were links to the English page —
+ * three languages, one URL, which misleads a visitor and, once indexed, tells
+ * a search engine three different things about the same document.
+ *
+ * They stay visible so the multilingual intent is legible, but as disabled
+ * controls rather than links. Real translations get real URLs and hreflang.
+ */
 const langs = [
-  { code: 'EN', label: 'English', href: url('/'), current: true },
-  { code: 'SL', label: 'Slovenščina', href: url('/'), current: false },
-  { code: 'DE', label: 'Deutsch', href: url('/'), current: false },
+  { code: 'EN', label: 'English', current: true },
+  { code: 'SL', label: 'Slovenščina — not yet translated', current: false },
+  { code: 'DE', label: 'Deutsch — noch nicht übersetzt', current: false },
 ];
 ---
 
@@ -46,15 +54,17 @@ const langs = [
         {
           langs.map((l) => (
             <li>
-              <a
-                href={l.href}
-                lang={l.code.toLowerCase()}
-                aria-current={l.current ? 'true' : undefined}
-                title={l.label}
-              >
-                <span aria-hidden="true">{l.code}</span>
-                <span class="sr-only">{l.label}</span>
-              </a>
+              {l.current ? (
+                <a href={url('/')} lang="en" aria-current="true" title={l.label}>
+                  <span aria-hidden="true">{l.code}</span>
+                  <span class="sr-only">{l.label}</span>
+                </a>
+              ) : (
+                <span class="nav__langOff" aria-disabled="true" title={l.label}>
+                  <span aria-hidden="true">{l.code}</span>
+                  <span class="sr-only">{l.label}</span>
+                </span>
+              )}
             </li>
           ))
         }
@@ -190,6 +200,17 @@ const langs = [
   .nav__langs a:hover {
     opacity: 1;
     background: rgb(0 0 0 / 0.05);
+  }
+
+  .nav__langOff {
+    display: grid;
+    place-items: center;
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    opacity: 0.3;
+    cursor: not-allowed;
   }
 
   .nav__langs a[aria-current='true'] {
