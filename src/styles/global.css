@@ -1,36 +1,41 @@
-@import '@fontsource-variable/fraunces';
-@import '@fontsource-variable/karla';
+@import '@fontsource/bodoni-moda/400.css';
+@import '@fontsource/bodoni-moda/400-italic.css';
+@import '@fontsource-variable/instrument-sans';
 
 /* ─────────────────────────────────────────────────────────────
    Tokens
 
-   Deliberately warm and tactile. The other Slovenian planner
-   demo is cool, architectural and editorial; two competing
-   planners must never receive the same-looking site.
+   Restyled to the Lake Bled demo's language, which Karin preferred
+   over the warm Fraunces/terracotta direction: a cold didone, cool
+   paper, lake green, square geometry and hairline rules.
 
-   The clay is Karin's own existing brand colour, kept because
-   it is already hers and it works. Terracotta is added as the
-   action colour — warm enough to belong, saturated enough to
-   carry a button.
+   The structure this site added — stories, the process spine, the
+   24 galleries, the events fork — is untouched. Only the surface
+   changed.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --paper: #fbf8f4;
-  --paper-deep: #f3ece4;
+  --paper: #faf7f2;
+  --paper-deep: #f2ece3;
+  --paper-warm: #f2ece3;
+  --ink: #1a1815;
+  --ink-soft: #56504a;
+  --ink-faint: #9b938a;
+  --lake: #3d5a4c;
+  --lake-light: #6d8a7b;
+  --rule: #ded5c8;
+
+  /* Kept from her own brand so the identity is still hers. */
   --clay: #c9b4a4;
   --clay-soft: #e2d5c9;
-  --ink: #2a2320;
-  --ink-soft: #5f544d;
-  --ink-faint: #9c8e84;
-  --terracotta: #b5603f;
-  --terracotta-deep: #93492d;
-  --rule: #e0d4c8;
 
-  /* Fraunces carries optical-size and soft/wonk axes — the warmth
-     is in the variable settings, not just the family name. */
-  --display: 'Fraunces Variable', 'Fraunces', Georgia, serif;
-  --sans: 'Karla Variable', 'Karla', system-ui, sans-serif;
+  /* Aliases so components written against the old palette keep working. */
+  --terracotta: var(--lake);
+  --terracotta-deep: #2e4539;
 
-  --fs-hero: clamp(2.5rem, 6vw, 5.25rem);
+  --display: 'Bodoni Moda', 'Didot', Georgia, serif;
+  --sans: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
+
+  --fs-hero: clamp(2.5rem, 6.4vw, 5.75rem);
   --fs-display: clamp(2rem, 4.6vw, 3.75rem);
   --fs-title: clamp(1.5rem, 2.8vw, 2.25rem);
   --fs-lead: clamp(1.0625rem, 1.3vw, 1.25rem);
@@ -38,7 +43,7 @@
   --fs-small: 0.8125rem;
 
   --gutter: clamp(1.25rem, 5vw, 4.5rem);
-  --measure: 36rem;
+  --measure: 34rem;
   --shell: 1520px;
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -58,10 +63,12 @@ html {
 body {
   margin: 0;
   background: var(--paper);
+  position: relative;
   color: var(--ink);
   font-family: var(--sans);
   font-size: var(--fs-body);
-  line-height: 1.68;
+  line-height: 1.65;
+  font-synthesis-weight: none;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -71,11 +78,8 @@ h2,
 h3,
 h4 {
   font-family: var(--display);
-  /* SOFT rounds the terminals, WONK lets the italic forms breathe.
-     This is what stops Fraunces reading like a default serif. */
-  font-variation-settings: 'SOFT' 30, 'WONK' 1;
-  font-weight: 500;
-  line-height: 1.06;
+  font-weight: 400;
+  line-height: 1.02;
   letter-spacing: -0.015em;
   margin: 0;
   text-wrap: balance;
@@ -88,6 +92,7 @@ p {
 
 a {
   color: inherit;
+  text-decoration-thickness: 1px;
   text-underline-offset: 0.22em;
 }
 
@@ -98,6 +103,26 @@ img {
 
 button {
   font: inherit;
+}
+
+/* A cotton-rag grain over the whole page. 4% opacity and fixed, so it reads
+   as the stock the site is printed on rather than a texture on the elements. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  /* Relative so it follows BASE_PATH; bundled CSS sits in /_astro/. */
+  background-image: url('../paper.jpg');
+  background-size: 520px;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+  z-index: 1;
+}
+
+body > * {
+  position: relative;
+  z-index: 2;
 }
 
 /* ── Layout ───────────────────────────────────────────────── */
@@ -111,22 +136,16 @@ button {
   padding-block: clamp(4rem, 10vw, 9.5rem);
 }
 
-/* Anchor targets must clear the sticky top bar, or "How it works" scrolls
-   its own heading underneath the nav. */
+/* Anchor targets must clear the sticky top bar. */
 [id] {
   scroll-margin-top: 7rem;
 }
 
-/* Full-width horizontal bands are this site's structural signature,
-   against the other build's asymmetric grid. */
 .band {
   width: 100%;
 }
 
-.band--clay {
-  background: var(--clay-soft);
-}
-
+.band--clay,
 .band--deep {
   background: var(--paper-deep);
 }
@@ -137,18 +156,31 @@ button {
 }
 
 /* ── Type utilities ───────────────────────────────────────── */
+/* The Bled eyebrow: a hairline rule, then spaced caps. */
 .eyebrow {
+  font-family: var(--sans);
   font-size: var(--fs-small);
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--terracotta);
-  margin: 0 0 1.35rem;
-  font-weight: 600;
+  color: var(--ink-faint);
+  font-weight: 400;
+  margin: 0 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 2.5rem;
+  height: 1px;
+  background: var(--rule);
+  flex: none;
 }
 
 .lead {
   font-size: var(--fs-lead);
-  line-height: 1.6;
+  line-height: 1.55;
   color: var(--ink-soft);
   max-width: var(--measure);
 }
@@ -156,32 +188,32 @@ button {
 .script {
   font-family: var(--display);
   font-style: italic;
-  font-variation-settings: 'SOFT' 60, 'WONK' 1;
 }
 
-/* ── Buttons ──────────────────────────────────────────────── */
+/* ── Buttons: square, spaced caps, hairline border ────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
   min-height: 48px;
-  padding: 0.95rem 1.9rem;
-  background: var(--terracotta);
+  padding: 1.05rem 2rem;
+  background: var(--lake);
   color: var(--paper);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   text-decoration: none;
-  border: 1px solid var(--terracotta);
-  border-radius: 999px;
+  border: 1px solid var(--lake);
+  border-radius: 0;
   cursor: pointer;
-  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+  transition: background 0.35s var(--ease), color 0.35s var(--ease);
 }
 
 .btn:hover {
-  background: var(--terracotta-deep);
-  border-color: var(--terracotta-deep);
+  background: transparent;
+  color: var(--lake);
 }
 
 .btn--quiet {
@@ -199,33 +231,40 @@ button {
 .textlink {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--terracotta);
+  gap: 0.55rem;
+  font-size: var(--fs-small);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
   text-decoration: none;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.2rem;
-  transition: gap 0.3s var(--ease);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.45rem;
+  transition: border-color 0.3s var(--ease), gap 0.3s var(--ease);
 }
 
 .textlink:hover {
-  gap: 0.85rem;
+  border-color: var(--ink);
+  gap: 0.95rem;
 }
 
-/* ── Scroll reveal ────────────────────────────────────────────
-   Visible by default; JS opts elements in. A screenshot, a print
-   or a scraper that never scrolls still sees a complete page.
-   ───────────────────────────────────────────────────────────── */
+/* Square everything: the warm build used pills and rounded cards. */
+:where(.btn, .cel__link, .form, .scard__img, .wcard__img, .owcard__img, .gcard__img,
+  .gal__item, .etype__pic, .ocard__img, .wcard__img, .about__figure, .reach__art,
+  .phero__figure, .shero__figure, .form__feedback) {
+  border-radius: 0;
+}
+
+/* ── Scroll reveal ────────────────────────────────────────── */
 [data-reveal-ready] {
   opacity: 0;
-  transform: translateY(1.5rem);
+  transform: translateY(1.75rem);
 }
 
 [data-reveal-ready].is-in {
   opacity: 1;
   transform: none;
-  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -248,7 +287,7 @@ button {
 
 /* ── Accessibility ────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--terracotta);
+  outline: 2px solid var(--lake);
   outline-offset: 3px;
 }
 
@@ -278,11 +317,7 @@ button {
   border: 0;
 }
 
-/* ── Top bar ──────────────────────────────────────────────────
-   Banner + nav as one unit. On overlay pages the whole thing is
-   fixed so the hero runs full-bleed underneath it; elsewhere it
-   sticks normally and occupies flow.
-   ───────────────────────────────────────────────────────────── */
+/* ── Top bar ──────────────────────────────────────────────── */
 .topbar {
   position: sticky;
   top: 0;
@@ -300,7 +335,7 @@ button {
   margin: 0;
   padding: 0.55rem var(--gutter);
   background: var(--ink);
-  color: rgb(251 248 244 / 0.82);
+  color: rgb(250 247 242 / 0.82);
   font-size: 0.75rem;
   line-height: 1.4;
   text-align: center;
@@ -310,5 +345,5 @@ button {
 
 .demo-banner strong {
   color: var(--paper);
-  font-weight: 600;
+  font-weight: 400;
 }

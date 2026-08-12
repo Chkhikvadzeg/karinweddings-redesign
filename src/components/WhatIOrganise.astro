@@ -1,21 +1,34 @@
 ---
+import Pic from './Pic.astro';
 import { celebrations } from '../data/celebrations';
 import { galleries } from '../data/galleries';
+import { photo } from '../lib/images';
 import { url } from '../lib/url';
 
 /**
- * Her five service categories, in her order.
+ * Her five categories.
  *
- * The live site presents these as five stacked colour blocks that are not
- * links — they name the service and then offer nowhere to go. Here each one
- * points at either the relevant service page or a real gallery of that kind
- * of event.
+ * Deliberately NOT numbered. The ledger is numbered because a wedding process
+ * genuinely is a sequence and the order carries meaning; a service menu is a
+ * set, and numbering it would be decoration pretending to be structure.
+ *
+ * The live site renders these as five colour blocks that link nowhere. Here
+ * they are a plain editorial list where each row reveals the work behind it
+ * on hover — the image is the argument, not a swatch.
  */
-const target = (c: (typeof celebrations)[number]) => {
-  if (c.slug === 'weddings') return url('/weddings/');
-  if (c.gallerySlug && galleries.some((g) => g.slug === c.gallerySlug))
-    return url(`/portfolio/${c.gallerySlug}/`);
-  return url(`/events/#${c.slug}`);
+const cover: Record<string, string | null> = {
+  weddings: 'lucka-domen--lucka-in-domen-organizator-porok-ljubljana-1',
+  engagements: 'zimska-zaroka--zimska-zaroka-organizacija-zarok-1',
+  bachelorette: 'anina-dekliscina--rimske-terme-vse-samo-rovan-001',
+  'baby-showers': 'organiziranje-baby-shower',
+  birthdays: 'bozicna-zaroka--bozicna-zaroka-1',
+};
+
+const target = (slug: string, gallerySlug?: string) => {
+  if (slug === 'weddings') return url('/weddings/');
+  if (gallerySlug && galleries.some((g) => g.slug === gallerySlug))
+    return url(`/portfolio/${gallerySlug}/`);
+  return url(`/events/#${slug}`);
 };
 ---
 
@@ -23,28 +36,39 @@ const target = (c: (typeof celebrations)[number]) => {
   <div class="shell">
     <header class="organise__head" data-reveal>
       <p class="eyebrow">What I organise</p>
-      <h2 class="organise__title">The whole list</h2>
+      <h2 class="organise__title">Five kinds of day</h2>
       <p class="lead">
-        Weddings are most of my work, but they are not all of it. Proposals, bachelorette weekends,
-        baby showers and the birthdays people actually remember — same approach, different scale.
+        Weddings are most of the work. They are not all of it — and four of these five are the
+        reason people find me before anyone mentions a wedding.
       </p>
     </header>
 
-    <ul class="organise__grid">
+    <ul class="olist">
       {
-        celebrations.map((c, i) => (
-          <li class="cel" data-reveal data-reveal-delay={i * 60}>
-            <a
-              class:list={['cel__link', { 'cel__link--ink': c.ink }]}
-              style={`--swatch:${c.colour}`}
-              href={target(c)}
-            >
-              <span class="cel__name">{c.name}</span>
-              <span class="cel__blurb">{c.blurb}</span>
-              <span class="cel__go" aria-hidden="true">→</span>
-            </a>
-          </li>
-        ))
+        celebrations.map((c, i) => {
+          const img = cover[c.slug];
+          return (
+            <li class="orow" data-reveal data-reveal-delay={i * 55}>
+              <a class="orow__link" href={target(c.slug, c.gallerySlug)}>
+                <span class="orow__name">{c.name}</span>
+                <span class="orow__blurb">{c.blurb}</span>
+                <span class="orow__go" aria-hidden="true">→</span>
+
+                {img && (
+                  <span class="orow__thumb" aria-hidden="true">
+                    <Pic
+                      src={photo(img)}
+                      alt=""
+                      decorative
+                      widths={[160, 320, 640]}
+                      sizes="(max-width: 900px) 76px, 300px"
+                    />
+                  </span>
+                )}
+              </a>
+            </li>
+          );
+        })
       }
     </ul>
   </div>
@@ -53,7 +77,7 @@ const target = (c: (typeof celebrations)[number]) => {
 <style>
   .organise__head {
     max-width: 44rem;
-    margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
   }
 
   .organise__title {
@@ -61,70 +85,122 @@ const target = (c: (typeof celebrations)[number]) => {
     margin-bottom: 1.25rem;
   }
 
-  .organise__grid {
+  .olist {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    gap: 0.75rem;
+    border-top: 1px solid var(--rule);
   }
 
-  .cel__link {
+  .orow {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .orow__link {
+    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 14rem) minmax(0, 1fr) auto;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) auto;
+    align-items: baseline;
     gap: 1.5rem;
-    background: var(--swatch);
-    color: var(--paper);
+    padding-block: clamp(1.35rem, 2.4vw, 2rem);
     text-decoration: none;
-    padding: clamp(1.15rem, 2.2vw, 1.6rem) clamp(1.25rem, 2.5vw, 2rem);
-    border-radius: 4px;
-    transition: transform 0.35s var(--ease), filter 0.35s var(--ease);
+    transition: padding-left 0.5s var(--ease);
   }
 
-  /* Her site puts white on every swatch; on the three light ones that is
-     roughly 1.5–2.3:1. Dark ink on those clears 4.5:1 comfortably. */
-  .cel__link--ink {
-    color: var(--ink);
-  }
-
-  .cel__link:hover {
-    transform: translateX(6px);
-    filter: brightness(1.04);
-  }
-
-  .cel__name {
+  .orow__name {
     font-family: var(--display);
-    font-variation-settings: 'SOFT' 30, 'WONK' 1;
-    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-    line-height: 1.15;
+    font-size: clamp(1.375rem, 3vw, 2.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.015em;
   }
 
-  .cel__blurb {
+  .orow__blurb {
     font-size: 0.9375rem;
-    opacity: 0.85;
+    color: var(--ink-soft);
   }
 
-  .cel__go {
-    font-size: 1.125rem;
-    opacity: 0.7;
+  .orow__go {
+    justify-self: end;
+    color: var(--ink-faint);
+    transition: color 0.3s var(--ease), transform 0.3s var(--ease);
   }
 
-  @media (max-width: 760px) {
-    .cel__link {
-      grid-template-columns: 1fr auto;
-      gap: 0.3rem 1rem;
+  /* Hover reveal, CSS only — the image is already in the DOM and only
+     opacity and transform animate, so it stays on the compositor. */
+  .orow__thumb {
+    position: absolute;
+    right: 3%;
+    top: 50%;
+    width: min(300px, 24vw);
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-45%) scale(0.94) rotate(-1.5deg);
+    transition: opacity 0.45s var(--ease), transform 0.55s var(--ease);
+    z-index: 2;
+  }
+
+  .orow__thumb :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 901px) {
+    /* Right third reserved permanently so the row never reflows under
+       the cursor when the image appears. */
+    .orow__link {
+      padding-right: 30%;
     }
-    .cel__name {
-      grid-column: 1;
+  }
+
+  @media (hover: hover) and (min-width: 901px) {
+    .orow__link:hover {
+      padding-left: 1.25rem;
     }
-    .cel__blurb {
-      grid-column: 1;
+
+    .orow__link:hover .orow__name {
+      font-style: italic;
     }
-    .cel__go {
-      grid-row: 1 / span 2;
-      grid-column: 2;
-      align-self: center;
+
+    .orow__link:hover .orow__go {
+      color: var(--lake);
+      transform: translateX(4px);
+    }
+
+    .orow__link:hover .orow__thumb,
+    .orow__link:focus-visible .orow__thumb {
+      opacity: 1;
+      transform: translateY(-50%) scale(1) rotate(-1.5deg);
+    }
+  }
+
+  /* No hover on touch — the image becomes a real inline thumbnail. */
+  @media (max-width: 900px), (hover: none) {
+    .orow__link {
+      grid-template-columns: 76px 1fr auto;
+      grid-template-areas: 'thumb name go' 'thumb blurb go';
+      gap: 0.25rem 1.1rem;
+      align-items: center;
+      padding-block: 1.1rem;
+    }
+    .orow__name {
+      grid-area: name;
+    }
+    .orow__blurb {
+      grid-area: blurb;
+      font-size: 0.875rem;
+    }
+    .orow__go {
+      grid-area: go;
+    }
+    .orow__thumb {
+      grid-area: thumb;
+      position: static;
+      width: 76px;
+      opacity: 1;
+      transform: none;
     }
   }
 </style>
