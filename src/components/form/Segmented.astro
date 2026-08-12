@@ -71,6 +71,7 @@ const { name, legend, options, value, stacked = false } = Astro.props;
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: 1fr;
+    align-items: stretch;
     border: 1px solid var(--rule);
     background: var(--paper);
   }
@@ -80,9 +81,12 @@ const { name, legend, options, value, stacked = false } = Astro.props;
     grid-auto-columns: auto;
   }
 
+  /* The tallest option (one with a note) sets the row height. Every item and
+     its face must stretch to fill it, or the selected fill sits inset and
+     shorter than its neighbours. */
   .seg__item {
     position: relative;
-    display: block;
+    display: grid;
     cursor: pointer;
   }
 
@@ -113,8 +117,9 @@ const { name, legend, options, value, stacked = false } = Astro.props;
     align-items: center;
     justify-content: center;
     gap: 0.15rem;
-    /* 44px minimum touch target */
+    /* 44px minimum touch target, then fill whatever the row needs */
     min-height: 46px;
+    height: 100%;
     padding: 0.6rem 0.75rem;
     text-align: center;
     transition: background 0.22s var(--ease), color 0.22s var(--ease);
