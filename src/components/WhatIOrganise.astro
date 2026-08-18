@@ -104,7 +104,7 @@ const target = (slug: string, gallerySlug?: string) => {
     gap: 1.5rem;
     padding-block: clamp(1.35rem, 2.4vw, 2rem);
     text-decoration: none;
-    transition: padding-left 0.5s var(--ease);
+    transition: padding-left var(--m-move) var(--ease);
   }
 
   .orow__name {
@@ -122,7 +122,7 @@ const target = (slug: string, gallerySlug?: string) => {
   .orow__go {
     justify-self: end;
     color: var(--ink-faint);
-    transition: color 0.3s var(--ease), transform 0.3s var(--ease);
+    transition: color var(--m-state) var(--ease), transform var(--m-state) var(--ease);
   }
 
   /* Hover reveal, CSS only — the image is already in the DOM and only
@@ -137,7 +137,7 @@ const target = (slug: string, gallerySlug?: string) => {
     pointer-events: none;
     opacity: 0;
     transform: translateY(-45%) scale(0.94) rotate(-1.5deg);
-    transition: opacity 0.45s var(--ease), transform 0.55s var(--ease);
+    transition: opacity var(--m-move) var(--ease-enter), transform var(--m-move) var(--ease-enter);
     z-index: 2;
   }
 

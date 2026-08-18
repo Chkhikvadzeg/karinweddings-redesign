@@ -281,7 +281,7 @@ const { name, label, id = name } = Astro.props;
     font-size: 1rem;
     text-align: left;
     cursor: pointer;
-    transition: border-color 0.22s var(--ease);
+    transition: border-color var(--m-state) var(--ease);
   }
 
   .dp__trigger:hover {
@@ -339,7 +339,7 @@ const { name, label, id = name } = Astro.props;
     border: 1px solid transparent;
     color: var(--ink-soft);
     cursor: pointer;
-    transition: border-color 0.22s var(--ease), color 0.22s var(--ease);
+    transition: border-color var(--m-state) var(--ease), color var(--m-state) var(--ease);
   }
 
   .dp__nav svg {
@@ -383,7 +383,7 @@ const { name, label, id = name } = Astro.props;
     font-size: 0.875rem;
     font-variant-numeric: tabular-nums;
     cursor: pointer;
-    transition: background 0.18s var(--ease), color 0.18s var(--ease);
+    transition: background var(--m-state) var(--ease), color var(--m-state) var(--ease);
   }
 
   .dp__grid :global(.dp__day:hover:not(:disabled)) {

@@ -78,7 +78,7 @@ const galleryFor = (slug?: string) =>
                 <span>depending on scale</span>
               </p>
               <div class="etype__actions">
-                <a class="btn" href={url(`/enquire/?for=celebrations`)}>Ask about {c.name.toLowerCase()}</a>
+                <a class="btn btn--quiet" href={url(`/enquire/?for=celebrations`)}>Ask about {c.name.toLowerCase()}</a>
                 {g && (
                   <a class="textlink" href={url(`/portfolio/${g.slug}/`)}>
                     See {g.title} →
@@ -151,7 +151,7 @@ const galleryFor = (slug?: string) =>
     display: block;
     width: 44px;
     height: 6px;
-    border-radius: 999px;
+    border-radius: var(--r-pill);
     background: var(--swatch);
     margin-bottom: 1.1rem;
   }
@@ -164,7 +164,7 @@ const galleryFor = (slug?: string) =>
   .etype__blurb {
     font-family: var(--display);
     font-size: 1.25rem;
-    color: var(--terracotta);
+    color: var(--ink-soft);
     margin-bottom: 1.1rem;
   }
 
@@ -217,7 +217,7 @@ const galleryFor = (slug?: string) =>
   .etype__pic {
     margin: 0;
     overflow: hidden;
-    border-radius: 4px;
+    border-radius: var(--r-soft);
     aspect-ratio: 1;
   }
 

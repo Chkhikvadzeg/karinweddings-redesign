@@ -67,7 +67,7 @@ const links = [
     pointer-events: auto;
     width: 50px;
     height: 50px;
-    border-radius: 9999px;
+    border-radius: var(--r-pill);
     background: var(--flare-deep);
     color: var(--canvas);
     border: 0;
@@ -75,7 +75,7 @@ const links = [
     place-items: center;
     cursor: pointer;
     text-decoration: none;
-    transition: transform 0.3s var(--ease), background 0.3s var(--ease);
+    transition: transform var(--m-state) var(--ease), background var(--m-state) var(--ease);
   }
 
   .dot:hover { transform: scale(1.08); }
@@ -86,7 +86,7 @@ const links = [
     width: 18px;
     height: 2px;
     background: currentColor;
-    transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+    transition: transform var(--m-state) var(--ease), opacity var(--m-state) var(--ease);
   }
 
   .dots.is-open .dot--menu { background: var(--ink); }
@@ -131,14 +131,14 @@ const links = [
     line-height: 0.95;
     text-decoration: none;
     display: inline-block;
-    transition: color 0.25s var(--ease), transform 0.35s var(--ease);
+    transition: color var(--m-state) var(--ease), transform var(--m-state) var(--ease);
   }
 
   .menu__list a:hover { color: var(--flare); transform: translateX(0.5rem); }
 
   /* Staggered entrance — one orchestrated moment, not scattered effects. */
   .menu.is-open .menu__list li {
-    animation: menu-in 0.5s var(--ease) both;
+    animation: menu-in var(--m-move) var(--ease-enter) both;
     animation-delay: calc(var(--i) * 55ms);
   }
 

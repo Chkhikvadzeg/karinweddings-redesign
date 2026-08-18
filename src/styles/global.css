@@ -42,8 +42,10 @@
   --canvas: #f6f2ec;
   --canvas-warm: #efe7dd;
   --ink: #14252e;
+  --fg: var(--ink);       /* foreground of the current ground */
+  --ground: var(--canvas); /* ...and the ground itself. Both flip in .band--deep. */
   --ink-soft: #4a5b63;
-  --ink-faint: #8b9aa1;
+  --ink-faint: #5a656b;  /* 5.37:1 on canvas, 4.89:1 on the warm band (was #8b9aa1 = 2.60:1) */
   --flare: #cf4b1e;
   /* Same hue, two jobs. Display type is large, so 3:1 is the bar and the
      vivid value clears it. Button labels are 14px, need 4.5:1, and the vivid
@@ -71,7 +73,30 @@
   --gutter: clamp(1.25rem, 4.2vw, 3.75rem);
   --gap: clamp(4.5rem, 11vw, 7.5rem);
   --shell: 1440px;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* ── Motion ─────────────────────────────────────────────────
+     Three durations, two curves. The numbers are measured, not
+     chosen: Linear's entire hover layer runs at 160ms on
+     easeOutQuad (112 of its 190 animated elements). Ours ran at
+     250-300ms across 13 unrelated durations, which is the
+     difference between "responsive" and "laggy" — and a scale
+     nobody can name is the thing that reads as generic.
+     ───────────────────────────────────────────────────────── */
+  --m-tap: 100ms;    /* colour flips — should feel instant */
+  --m-state: 160ms;  /* hover and focus: the default */
+  --m-move: 400ms;   /* anything that moves or changes layout */
+  --m-enter: 640ms;  /* scroll reveals — editorial, so slower */
+  --m-drift: 900ms;  /* image scale; the slowness is the point */
+
+  --r-sharp: 0;
+  --r-soft: 4px;     /* the only card/button radius */
+  --r-pill: 9999px;  /* was spelt both 999px and 9999px */
+
+  --ease-state: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* easeOutQuad */
+  --ease-enter: cubic-bezier(0.165, 0.84, 0.44, 1);   /* easeOutQuart */
+
+  /* Alias, same trick as the palette below: 21 transitions still
+     say var(--ease) and most of them are hover states. */
+  --ease: var(--ease-state);
 
   /* ── Compatibility aliases ──────────────────────────────────
      The palette and scale were renamed wholesale; 134 var() calls
@@ -164,7 +189,21 @@ button { font: inherit; }
 
 [id] { scroll-margin-top: 5rem; }
 
-.band--deep { background: var(--deep); color: var(--canvas); }
+.band--deep,
+.band--ink {
+  background: var(--deep);
+  color: var(--canvas);
+  /* The muted tones are calibrated against cream. On an ink ground they
+     invert: ink-soft drops to 2.23:1. Redeclaring the two tokens here
+     fixes every descendant at once — no component needs to know which
+     ground it is sitting on. --ink itself is left alone: it is used as a
+     background elsewhere (.btn--quiet:hover) and flipping it would
+     paint cream on cream. */
+  --fg: var(--canvas);
+  --ground: var(--deep);
+  --ink-soft: #b4bfc4;   /* 8.39:1 on ink */
+  --ink-faint: #8b9aa1;  /* 5.42:1 on ink */
+}
 .band--warm { background: var(--canvas-warm); }
 .band--clay { background: var(--canvas-warm); }
 
@@ -223,20 +262,20 @@ button { font: inherit; }
   letter-spacing: 0.01em;
   text-decoration: none;
   border: 1px solid var(--flare-deep);
-  border-radius: 10px;
+  border-radius: var(--r-soft);
   cursor: pointer;
-  transition: background 0.3s var(--ease), color 0.3s var(--ease);
+  transition: background var(--m-state) var(--ease), color var(--m-state) var(--ease);
 }
 
 .btn:hover { background: transparent; color: var(--flare-deep); }
 
 .btn--quiet {
   background: transparent;
-  color: var(--ink);
-  border-color: var(--ink);
+  color: var(--fg);
+  border-color: var(--fg);
 }
 
-.btn--quiet:hover { background: var(--ink); color: var(--canvas); }
+.btn--quiet:hover { background: var(--fg); color: var(--ground); }
 
 .textlink {
   display: inline-flex;
@@ -244,11 +283,11 @@ button { font: inherit; }
   gap: 0.5rem;
   font-weight: 500;
   font-size: var(--t-cap);
-  color: var(--ink);
+  color: var(--fg);
   text-decoration: none;
   border-bottom: 1px solid var(--quiet);
   padding-bottom: 0.2rem;
-  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), gap 0.25s var(--ease);
+  transition: color var(--m-state) var(--ease), border-color var(--m-state) var(--ease), gap var(--m-state) var(--ease);
 }
 
 .textlink:hover { color: var(--flare); border-color: var(--flare); gap: 0.85rem; }
@@ -257,9 +296,9 @@ button { font: inherit; }
   display: inline-block;
   font-weight: 500;
   font-size: var(--t-label);
-  color: var(--ink);
+  color: var(--fg);
   background: var(--echo);
-  border-radius: 9999px;
+  border-radius: var(--r-pill);
   padding: 0.45rem 0.95rem;
 }
 
@@ -268,7 +307,7 @@ button { font: inherit; }
 [data-reveal-ready].is-in {
   opacity: 1;
   transform: none;
-  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+  transition: opacity var(--m-enter) var(--ease-enter), transform var(--m-enter) var(--ease-enter);
 }
 
 @media (prefers-reduced-motion: reduce) {

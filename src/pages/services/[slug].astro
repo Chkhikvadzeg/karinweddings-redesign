@@ -145,7 +145,7 @@ const others = services.filter((s) => s.slug !== service.slug);
 
   .shero__tagline {
     font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-    color: var(--terracotta);
+    color: var(--fg);
     margin-bottom: 2.25rem;
   }
 
@@ -225,11 +225,11 @@ const others = services.filter((s) => s.slug !== service.slug);
   }
 
   .cstep--on {
-    color: var(--ink);
+    color: var(--fg);
   }
 
   .cstep__mark {
-    color: var(--terracotta);
+    color: var(--ink-faint);
     font-size: 0.75rem;
   }
 
@@ -252,7 +252,7 @@ const others = services.filter((s) => s.slug !== service.slug);
   }
 
   .cstep--on .cstep__state {
-    color: var(--terracotta);
+    color: var(--fg);
     font-weight: 600;
   }
 
@@ -330,8 +330,8 @@ const others = services.filter((s) => s.slug !== service.slug);
     top: 0.4rem;
     width: 0.6rem;
     height: 0.32rem;
-    border-left: 1.5px solid var(--terracotta);
-    border-bottom: 1.5px solid var(--terracotta);
+    border-left: 1.5px solid var(--fg);
+    border-bottom: 1.5px solid var(--fg);
     transform: rotate(-45deg);
   }
 
@@ -360,7 +360,7 @@ const others = services.filter((s) => s.slug !== service.slug);
     align-items: baseline;
     padding-block: 1.35rem;
     text-decoration: none;
-    transition: padding-inline 0.4s var(--ease);
+    transition: padding-inline var(--m-move) var(--ease);
   }
 
   .sothers__list a:hover {
@@ -379,7 +379,7 @@ const others = services.filter((s) => s.slug !== service.slug);
 
   .sothers__price {
     font-size: var(--fs-small);
-    color: var(--terracotta);
+    color: var(--fg);
     font-weight: 600;
     white-space: nowrap;
     justify-self: end;
