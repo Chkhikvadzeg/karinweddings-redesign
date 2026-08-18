@@ -44,9 +44,7 @@ jobs:
       - name: Restore image cache
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules/.astro
-            .classic/node_modules/.astro
+          path: node_modules/.astro
           key: astro-images-${{ hashFiles('src/assets/**') }}
           restore-keys: astro-images-
 
@@ -56,6 +54,12 @@ jobs:
 
       - name: Build classic
         run: |
+          # actions/cache used to restore .classic/node_modules/.astro, which
+          # created .classic/ before this step and made `worktree add` fail with
+          # "already exists" on every run after the first. The nested path is
+          # gone from the cache now; this prune is belt and braces.
+          rm -rf .classic
+          git worktree prune
           git worktree add .classic "$CLASSIC_REF"
           cd .classic
           npm ci
