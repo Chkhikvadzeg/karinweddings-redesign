@@ -262,7 +262,7 @@ button { font: inherit; }
   letter-spacing: 0.01em;
   text-decoration: none;
   border: 1px solid var(--flare-deep);
-  border-radius: var(--r-soft);
+  border-radius: var(--r-sharp);
   cursor: pointer;
   transition: background var(--m-state) var(--ease), color var(--m-state) var(--ease);
 }
