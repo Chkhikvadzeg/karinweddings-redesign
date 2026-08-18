@@ -1,59 +1,108 @@
-@import '@fontsource/bodoni-moda/400.css';
-@import '@fontsource/bodoni-moda/400-italic.css';
-@import '@fontsource-variable/instrument-sans';
+@import '@fontsource/anton';
+
+/* Clash Grotesk, self-hosted from Fontshare rather than hotlinked. */
+@font-face {
+  font-family: 'Clash Grotesk';
+  src: url('/karinweddings-redesign/fonts/clash-grotesk-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Grotesk';
+  src: url('/karinweddings-redesign/fonts/clash-grotesk-500.woff2') format('woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Clash Grotesk';
+  src: url('/karinweddings-redesign/fonts/clash-grotesk-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
 
 /* ─────────────────────────────────────────────────────────────
-   Tokens
+   Editorial-magazine system.
 
-   Restyled to the Lake Bled demo's language, which Karin preferred
-   over the warm Fraunces/terracotta direction: a cold didone, cool
-   paper, lake green, square geometry and hairline rules.
+   Structure borrowed from the Foudre reference: one idea per
+   viewport, display type at architectural scale, near-zero chrome,
+   colour as punctuation. Palette is NOT borrowed — every value is
+   Karin's own brand taken to full saturation, so the site is bold
+   without being another studio's identity.
 
-   The structure this site added — stories, the process spine, the
-   24 galleries, the events fork — is untouched. Only the surface
-   changed.
+     her navy      #23303c  →  #14252e  body text
+     her rust      #8f5437  →  #cf4b1e  display accent
+     her clay      #ded5c8  →  kept     faded echo
+     her blue-grey #96aab3  →  kept     quiet marks
+
+   The single most important move, stolen from the reference: body
+   text is a deep saturated colour, never a neutral grey. That one
+   choice does more than any layout trick.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --paper: #faf7f2;
-  --paper-deep: #f2ece3;
-  --paper-warm: #f2ece3;
-  --ink: #1a1815;
-  --ink-soft: #56504a;
-  --ink-faint: #9b938a;
-  --lake: #3d5a4c;
-  --lake-light: #6d8a7b;
-  --rule: #ded5c8;
+  --canvas: #f6f2ec;
+  --canvas-warm: #efe7dd;
+  --ink: #14252e;
+  --ink-soft: #4a5b63;
+  --ink-faint: #8b9aa1;
+  --flare: #cf4b1e;
+  /* Same hue, two jobs. Display type is large, so 3:1 is the bar and the
+     vivid value clears it. Button labels are 14px, need 4.5:1, and the vivid
+     value only reaches 4.03 — so small-text surfaces use the darker one. */
+  --flare-deep: #c0431a;
+  --flare-mid: #e8834f;
+  --echo: #ded5c8;
+  --quiet: #96aab3;
+  --deep: #14252e;
 
-  /* Kept from her own brand so the identity is still hers. */
-  --clay: #c9b4a4;
-  --clay-soft: #e2d5c9;
+  --display: 'Anton', 'Antonio', 'Haettenschweiler', Impact, sans-serif;
+  --sans: 'Clash Grotesk', 'Archivo', system-ui, sans-serif;
 
-  /* Aliases so components written against the old palette keep working. */
-  --terracotta: var(--lake);
-  --terracotta-deep: #2e4539;
+  /* Architectural scale. The old build maxed out near 60px, which is
+     the single biggest reason it read as timid. */
+  --t-display: clamp(4rem, 15.5vw, 14.5rem);
+  --t-huge: clamp(3rem, 10vw, 8.125rem);
+  --t-big: clamp(2.25rem, 6.6vw, 5.875rem);
+  --t-mid: clamp(1.75rem, 3.6vw, 2.875rem);
+  --t-body: clamp(1.0625rem, 1.35vw, 1.25rem);
+  --t-cap: 0.875rem;
+  --t-label: 0.75rem;
+  --t-micro: 0.625rem;
 
-  --display: 'Bodoni Moda', 'Didot', Georgia, serif;
-  --sans: 'Instrument Sans Variable', 'Instrument Sans', system-ui, sans-serif;
-
-  --fs-hero: clamp(2.5rem, 6.4vw, 5.75rem);
-  --fs-display: clamp(2rem, 4.6vw, 3.75rem);
-  --fs-title: clamp(1.5rem, 2.8vw, 2.25rem);
-  --fs-lead: clamp(1.0625rem, 1.3vw, 1.25rem);
-  --fs-body: 1.0625rem;
-  --fs-small: 0.8125rem;
-
-  --gutter: clamp(1.25rem, 5vw, 4.5rem);
-  --measure: 34rem;
-  --shell: 1520px;
-
+  --gutter: clamp(1.25rem, 4.2vw, 3.75rem);
+  --gap: clamp(4.5rem, 11vw, 7.5rem);
+  --shell: 1440px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* ── Compatibility aliases ──────────────────────────────────
+     The palette and scale were renamed wholesale; 134 var() calls
+     across the components still use the old names. Mapping them
+     here keeps one source of truth instead of 134 hand edits, and
+     any component can migrate to the new names at leisure.
+     ───────────────────────────────────────────────────────── */
+  --paper: var(--canvas);
+  --paper-deep: var(--canvas-warm);
+  --paper-warm: var(--canvas-warm);
+  --rule: #d9cfc4;
+  --clay: var(--echo);
+  --clay-soft: var(--echo);
+  --lake: var(--flare);
+  --lake-light: var(--flare-mid);
+  --terracotta: var(--flare);
+  --terracotta-deep: #a63a14;
+  --measure: 60ch;
+
+  --fs-hero: var(--t-huge);
+  --fs-display: var(--t-big);
+  --fs-title: var(--t-mid);
+  --fs-lead: var(--t-body);
+  --fs-body: var(--t-body);
+  --fs-small: var(--t-cap);
 }
+
 
 *,
 *::before,
-*::after {
-  box-sizing: border-box;
-}
+*::after { box-sizing: border-box; }
 
 html {
   -webkit-text-size-adjust: 100%;
@@ -62,68 +111,38 @@ html {
 
 body {
   margin: 0;
-  background: var(--paper);
-  position: relative;
+  background: var(--canvas);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: var(--fs-body);
-  line-height: 1.65;
-  font-synthesis-weight: none;
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.35;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-h1,
-h2,
-h3,
-h4 {
+/* Anton is display-only. 0.78 leading packs lines into a block that
+   reads as architecture rather than as text that happens to be big. */
+h1, h2, h3 {
   font-family: var(--display);
   font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: -0.015em;
+  line-height: 0.78;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
   margin: 0;
   text-wrap: balance;
 }
 
-p {
-  margin: 0 0 1.15em;
-  text-wrap: pretty;
+h4, h5, h6 {
+  font-family: var(--sans);
+  font-weight: 700;
+  margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.22em;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-button {
-  font: inherit;
-}
-
-/* A cotton-rag grain over the whole page. 4% opacity and fixed, so it reads
-   as the stock the site is printed on rather than a texture on the elements. */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  /* Relative so it follows BASE_PATH; bundled CSS sits in /_astro/. */
-  background-image: url('../paper.jpg');
-  background-size: 520px;
-  opacity: 0.045;
-  mix-blend-mode: multiply;
-  pointer-events: none;
-  z-index: 1;
-}
-
-body > * {
-  position: relative;
-  z-index: 2;
-}
+p { margin: 0 0 1.1em; text-wrap: pretty; }
+a { color: inherit; text-underline-offset: 0.2em; }
+img { max-width: 100%; display: block; }
+button { font: inherit; }
 
 /* ── Layout ───────────────────────────────────────────────── */
 .shell {
@@ -132,218 +151,162 @@ body > * {
   padding-inline: var(--gutter);
 }
 
-.section {
-  padding-block: clamp(4rem, 10vw, 9.5rem);
-}
-
-/* Anchor targets must clear the sticky top bar. */
-[id] {
-  scroll-margin-top: 7rem;
-}
-
-.band {
-  width: 100%;
-}
-
-.band--clay,
-.band--deep {
-  background: var(--paper-deep);
-}
-
-.band--ink {
-  background: var(--ink);
-  color: var(--paper);
-}
-
-/* ── Type utilities ───────────────────────────────────────── */
-/* The Bled eyebrow: a hairline rule, then spaced caps. */
-.eyebrow {
-  font-family: var(--sans);
-  font-size: var(--fs-small);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  font-weight: 400;
-  margin: 0 0 1.5rem;
+/* One idea per screen. Sections own a viewport and anchor bottom-left. */
+.screen {
+  min-height: 100svh;
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding-block: var(--gap) clamp(3rem, 7vw, 6rem);
 }
 
-.eyebrow::before {
-  content: '';
-  width: 2.5rem;
-  height: 1px;
-  background: var(--rule);
-  flex: none;
+.section { padding-block: var(--gap); }
+
+[id] { scroll-margin-top: 5rem; }
+
+.band--deep { background: var(--deep); color: var(--canvas); }
+.band--warm { background: var(--canvas-warm); }
+.band--clay { background: var(--canvas-warm); }
+
+/* ── Type roles ───────────────────────────────────────────── */
+.d-display { font-size: var(--t-display); }
+.d-huge { font-size: var(--t-huge); }
+.d-big { font-size: var(--t-big); }
+.d-mid { font-size: var(--t-mid); }
+
+.flare { color: var(--flare); }
+.echo { color: var(--echo); }
+
+/* The whispered label above a display block. */
+.label {
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: var(--t-label);
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  margin: 0 0 var(--gutter);
+  text-transform: none;
+}
+
+.eyebrow { /* legacy alias */
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: var(--t-label);
+  color: var(--ink-soft);
+  margin: 0 0 1.25rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
 }
 
 .lead {
-  font-size: var(--fs-lead);
-  line-height: 1.55;
+  font-size: var(--t-body);
+  line-height: 1.45;
   color: var(--ink-soft);
-  max-width: var(--measure);
+  max-width: 60ch;
 }
 
-.script {
-  font-family: var(--display);
-  font-style: italic;
-}
+.script { font-family: var(--display); font-style: normal; }
 
-/* ── Buttons: square, spaced caps, hairline border ────────── */
+/* ── Chrome: almost none ──────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.7rem;
+  gap: 0.6rem;
   min-height: 48px;
-  padding: 1.05rem 2rem;
-  background: var(--lake);
-  color: var(--paper);
-  font-size: 0.8125rem;
-  font-weight: 400;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  padding: 0.9rem 1.6rem;
+  background: var(--flare-deep);
+  color: var(--canvas);
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: var(--t-cap);
+  letter-spacing: 0.01em;
   text-decoration: none;
-  border: 1px solid var(--lake);
-  border-radius: 0;
+  border: 1px solid var(--flare-deep);
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.35s var(--ease), color 0.35s var(--ease);
+  transition: background 0.3s var(--ease), color 0.3s var(--ease);
 }
 
-.btn:hover {
-  background: transparent;
-  color: var(--lake);
-}
+.btn:hover { background: transparent; color: var(--flare-deep); }
 
 .btn--quiet {
   background: transparent;
   color: var(--ink);
-  border-color: var(--rule);
+  border-color: var(--ink);
 }
 
-.btn--quiet:hover {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--paper);
-}
+.btn--quiet:hover { background: var(--ink); color: var(--canvas); }
 
 .textlink {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: var(--fs-small);
-  font-weight: 400;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: var(--t-cap);
   color: var(--ink);
   text-decoration: none;
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 0.45rem;
-  transition: border-color 0.3s var(--ease), gap 0.3s var(--ease);
+  border-bottom: 1px solid var(--quiet);
+  padding-bottom: 0.2rem;
+  transition: color 0.25s var(--ease), border-color 0.25s var(--ease), gap 0.25s var(--ease);
 }
 
-.textlink:hover {
-  border-color: var(--ink);
-  gap: 0.95rem;
+.textlink:hover { color: var(--flare); border-color: var(--flare); gap: 0.85rem; }
+
+.tag {
+  display: inline-block;
+  font-weight: 500;
+  font-size: var(--t-label);
+  color: var(--ink);
+  background: var(--echo);
+  border-radius: 9999px;
+  padding: 0.45rem 0.95rem;
 }
 
-/* Square everything: the warm build used pills and rounded cards. */
-:where(.btn, .cel__link, .form, .scard__img, .wcard__img, .owcard__img, .gcard__img,
-  .gal__item, .etype__pic, .ocard__img, .wcard__img, .about__figure, .reach__art,
-  .phero__figure, .shero__figure, .form__feedback) {
-  border-radius: 0;
-}
-
-/* ── Scroll reveal ────────────────────────────────────────── */
-[data-reveal-ready] {
-  opacity: 0;
-  transform: translateY(1.75rem);
-}
-
+/* ── Reveal ───────────────────────────────────────────────── */
+[data-reveal-ready] { opacity: 0; transform: translateY(1.5rem); }
 [data-reveal-ready].is-in {
   opacity: 1;
   transform: none;
-  transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  html { scroll-behavior: auto; }
+  [data-reveal-ready], [data-reveal-ready].is-in {
+    opacity: 1; transform: none; transition: none;
   }
-  [data-reveal-ready],
-  [data-reveal-ready].is-in {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
 
 /* ── Accessibility ────────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid var(--lake);
-  outline-offset: 3px;
-}
+:focus-visible { outline: 2px solid var(--flare); outline-offset: 3px; }
 
 .skip {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  background: var(--ink);
-  color: var(--paper);
-  padding: 1rem 1.5rem;
-  z-index: 999;
+  position: absolute; left: -9999px; top: 0;
+  background: var(--ink); color: var(--canvas);
+  padding: 1rem 1.5rem; z-index: 999;
 }
-
-.skip:focus {
-  left: 0;
-}
+.skip:focus { left: 0; }
 
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-/* ── Top bar ──────────────────────────────────────────────── */
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-.topbar--overlay {
-  position: fixed;
-  inset-inline: 0;
-  top: 0;
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
 }
 
 /* ── Demo provenance ──────────────────────────────────────── */
 .demo-banner {
   margin: 0;
-  padding: 0.55rem var(--gutter);
+  padding: 0.5rem var(--gutter);
   background: var(--ink);
-  color: rgb(250 247 242 / 0.82);
-  font-size: 0.75rem;
+  color: rgb(246 242 236 / 0.86);
+  font-size: var(--t-label);
   line-height: 1.4;
   text-align: center;
   position: relative;
   z-index: 101;
 }
-
-.demo-banner strong {
-  color: var(--paper);
-  font-weight: 400;
-}
+.demo-banner strong { color: var(--canvas); font-weight: 500; }

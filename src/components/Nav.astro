@@ -1,259 +1,193 @@
 ---
-import { Image } from 'astro:assets';
 import { site } from '../data/site';
 import { url } from '../lib/url';
-import mark from '../assets/brand/karin-mark-ink.png';
 
-interface Props {
-  overlay?: boolean;
-}
+interface Props { overlay?: boolean }
 const { overlay = false } = Astro.props;
 
 const links = [
   { href: url('/weddings/'), label: 'Weddings' },
   { href: url('/events/'), label: 'Events' },
   { href: url('/portfolio/'), label: 'Portfolio' },
+  { href: url('/#organise'), label: 'What I organise' },
   { href: url('/#about'), label: 'About Karin' },
-];
-
-/**
- * Language switcher. The live site uses two tiny flag icons — flags are
- * countries, not languages, and German is read in Austria and Switzerland
- * too. Text codes with real labels instead.
- */
-/**
- * Only English exists. Previously SL and DE were links to the English page —
- * three languages, one URL, which misleads a visitor and, once indexed, tells
- * a search engine three different things about the same document.
- *
- * They stay visible so the multilingual intent is legible, but as disabled
- * controls rather than links. Real translations get real URLs and hreflang.
- */
-const langs = [
-  { code: 'EN', label: 'English', current: true },
-  { code: 'SL', label: 'Slovenščina — not yet translated', current: false },
-  { code: 'DE', label: 'Deutsch — noch nicht übersetzt', current: false },
+  { href: url('/enquire/'), label: 'Check your date' },
 ];
 ---
 
-<header class:list={['nav', { 'nav--overlay': overlay }]} data-nav>
-  <div class="nav__inner">
-    <a href={url('/')} class="nav__mark" aria-label={`${site.name} — home`}>
-      {/* Her real logo mark, recoloured to ink; inverted to white by CSS when
-          the nav overlays a dark hero. */}
-      <Image src={mark} alt="" width={120} height={38} densities={[1, 2]} class="nav__markImg" />
-      <span class="nav__markSub">Weddings &amp; Events</span>
-    </a>
+<!--
+  Two dots, no nav bar.
 
-    <nav class="nav__links" aria-label="Primary">
-      {links.map((l) => <a href={l.href}>{l.label}</a>)}
-    </nav>
+  The reference strips navigation to two circles in opposite corners so the
+  canvas stays empty for type. Same idea here, with one difference that
+  matters: a real <dialog>-less disclosure rather than a decorative widget —
+  the menu is keyboard-operable, focus-trapped by aria, and Escape closes it.
+-->
+<header class:list={['dots', { 'dots--overlay': overlay }]} data-nav>
+  <button
+    type="button"
+    class="dot dot--menu"
+    aria-expanded="false"
+    aria-controls="site-menu"
+    data-menu-toggle
+  >
+    <span class="dot__bars" aria-hidden="true"><i></i><i></i></span>
+    <span class="sr-only">Open menu</span>
+  </button>
 
-    <div class="nav__right">
-      <ul class="nav__langs" aria-label="Language">
-        {
-          langs.map((l) => (
-            <li>
-              {l.current ? (
-                <a href={url('/')} lang="en" aria-current="true" title={l.label}>
-                  <span aria-hidden="true">{l.code}</span>
-                  <span class="sr-only">{l.label}</span>
-                </a>
-              ) : (
-                <span class="nav__langOff" aria-disabled="true" title={l.label}>
-                  <span aria-hidden="true">{l.code}</span>
-                  <span class="sr-only">{l.label}</span>
-                </span>
-              )}
-            </li>
-          ))
-        }
-      </ul>
-      <a href={url('/enquire/')} class="btn nav__cta">Check your date</a>
-    </div>
-  </div>
+  <a class="dot dot--mark" href={url('/')} aria-label={`${site.name} — home`}>
+    <span class="dot__k" aria-hidden="true">K</span>
+  </a>
 </header>
 
+<nav class="menu" id="site-menu" aria-label="Primary" hidden data-menu>
+  <ul class="menu__list">
+    {links.map((l, i) => (
+      <li style={`--i:${i}`}><a href={l.href}>{l.label}</a></li>
+    ))}
+  </ul>
+  <p class="menu__foot">
+    <a href={`mailto:${site.email}`}>{site.email}</a>
+    <a href={`tel:${site.phoneHref}`}>{site.phone}</a>
+  </p>
+</nav>
+
 <style>
-  /* Positioning is owned by .topbar in global.css — the nav only styles
-     itself, so the banner above it can never be overlapped. */
-  .nav {
-    position: relative;
-    background: var(--paper);
-    border-bottom: 1px solid transparent;
-    transition: background 0.35s var(--ease), border-color 0.35s var(--ease);
-  }
-
-  .nav--overlay {
-    background: transparent;
-    color: var(--paper);
-  }
-
-  /* Hero photographs are not reliably dark at the top; a soft scrim keeps
-     the bar legible over any image and fades once it goes solid. */
-  .nav--overlay::before {
-    content: '';
-    position: absolute;
-    inset: -0.5rem 0 auto 0;
-    height: 260%;
-    background: linear-gradient(to bottom, rgb(42 35 32 / 0.5), rgb(42 35 32 / 0));
+  .dots {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 120;
+    display: flex;
+    justify-content: space-between;
+    padding: var(--gutter);
     pointer-events: none;
-    transition: opacity 0.4s var(--ease);
   }
 
-  .nav--overlay.is-stuck::before {
-    opacity: 0;
-  }
-
-  .nav--overlay.is-stuck {
-    background: var(--paper);
-    color: var(--ink);
-    border-bottom-color: var(--rule);
-  }
-
-  .nav:not(.nav--overlay).is-stuck {
-    border-bottom-color: var(--rule);
-  }
-
-  .nav__inner {
-    position: relative;
-    max-width: var(--shell);
-    margin-inline: auto;
-    padding: 1rem var(--gutter);
+  .dot {
+    pointer-events: auto;
+    width: 50px;
+    height: 50px;
+    border-radius: 9999px;
+    background: var(--flare-deep);
+    color: var(--canvas);
+    border: 0;
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 2rem;
+    place-items: center;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.3s var(--ease), background 0.3s var(--ease);
   }
 
-  .nav__mark {
-    text-decoration: none;
+  .dot:hover { transform: scale(1.08); }
+
+  .dot__bars { display: grid; gap: 5px; }
+  .dot__bars i {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: currentColor;
+    transition: transform 0.3s var(--ease), opacity 0.3s var(--ease);
+  }
+
+  .dots.is-open .dot--menu { background: var(--ink); }
+  .dots.is-open .dot__bars i:first-child { transform: translateY(3.5px) rotate(45deg); }
+  .dots.is-open .dot__bars i:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+
+  .dot__k {
+    font-family: var(--display);
+    font-size: 1.5rem;
+    line-height: 1;
+    padding-top: 2px;
+  }
+
+  /* ── Menu ─────────────────────────────────────────────── */
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 110;
+    background: var(--canvas);
     display: flex;
     flex-direction: column;
-    line-height: 1;
-  }
-
-  .nav__mark :global(.nav__markImg) {
-    width: 118px;
-    height: auto;
-    transition: filter 0.35s var(--ease);
-  }
-
-  /* One asset, two contexts: invert to white over the dark hero. */
-  .nav--overlay:not(.is-stuck) .nav__mark :global(.nav__markImg) {
-    filter: brightness(0) invert(1);
-  }
-
-  .nav__markSub {
-    font-size: 0.5625rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    opacity: 0.62;
-    margin-top: 0.3rem;
-  }
-
-  .nav__links {
-    display: flex;
     justify-content: center;
-    gap: clamp(1.25rem, 2.6vw, 2.5rem);
+    padding: calc(var(--gutter) * 2) var(--gutter);
   }
 
-  .nav__links a {
-    font-size: 0.9375rem;
-    text-decoration: none;
-    opacity: 0.8;
-    transition: opacity 0.25s var(--ease);
-  }
+  .menu[hidden] { display: none; }
 
-  .nav__links a:hover {
-    opacity: 1;
-  }
-
-  .nav__right {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-  }
-
-  .nav__langs {
-    display: flex;
-    gap: 0.15rem;
+  .menu__list {
     list-style: none;
-    margin: 0;
+    margin: 0 0 auto;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
   }
 
-  .nav__langs a {
-    display: grid;
-    place-items: center;
-    min-width: 36px;
-    min-height: 36px;
-    font-size: 0.6875rem;
-    letter-spacing: 0.08em;
-    font-weight: 600;
+  .menu__list a {
+    font-family: var(--display);
+    text-transform: uppercase;
+    font-size: clamp(2.25rem, 8vw, 5.5rem);
+    line-height: 0.95;
     text-decoration: none;
-    opacity: 0.5;
-    border-radius: 999px;
-    transition: opacity 0.25s var(--ease), background 0.25s var(--ease);
+    display: inline-block;
+    transition: color 0.25s var(--ease), transform 0.35s var(--ease);
   }
 
-  .nav__langs a:hover {
-    opacity: 1;
-    background: rgb(0 0 0 / 0.05);
+  .menu__list a:hover { color: var(--flare); transform: translateX(0.5rem); }
+
+  /* Staggered entrance — one orchestrated moment, not scattered effects. */
+  .menu.is-open .menu__list li {
+    animation: menu-in 0.5s var(--ease) both;
+    animation-delay: calc(var(--i) * 55ms);
   }
 
-  .nav__langOff {
-    display: grid;
-    place-items: center;
-    min-width: 36px;
-    min-height: 36px;
-    font-size: 0.6875rem;
-    letter-spacing: 0.08em;
-    opacity: 0.3;
-    cursor: not-allowed;
+  @keyframes menu-in {
+    from { opacity: 0; transform: translateY(1.25rem); }
+    to { opacity: 1; transform: none; }
   }
 
-  .nav__langs a[aria-current='true'] {
-    opacity: 1;
-    background: var(--clay-soft);
-    color: var(--ink);
+  .menu__foot {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin: 0;
+    font-size: var(--t-cap);
+    color: var(--ink-soft);
   }
 
-  .nav__cta {
-    padding: 0.7rem 1.3rem;
-    min-height: 42px;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-  }
+  .menu__foot a { text-decoration: none; }
+  .menu__foot a:hover { color: var(--flare); }
 
-  @media (max-width: 1000px) {
-    .nav__links {
-      display: none;
-    }
-    .nav__inner {
-      grid-template-columns: 1fr auto;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .nav__langs {
-      display: none;
-    }
-    /* The square button's padding is generous by design; at phone widths it
-       has to give, or the label wraps and doubles the bar's height. */
-    .nav__cta {
-      padding: 0.6rem 0.85rem;
-      min-height: 38px;
-      font-size: 0.6875rem;
-      letter-spacing: 0.06em;
-    }
-    .nav__inner {
-      gap: 0.75rem;
-      padding-inline: 1rem;
-    }
-    .nav__mark :global(.nav__markImg) {
-      width: 96px;
-    }
+  @media (prefers-reduced-motion: reduce) {
+    .menu.is-open .menu__list li { animation: none; }
   }
 </style>
+
+<script>
+  function initMenu() {
+    const bar = document.querySelector<HTMLElement>('[data-nav]');
+    const btn = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const menu = document.querySelector<HTMLElement>('[data-menu]');
+    if (!bar || !btn || !menu) return;
+
+    const setOpen = (open: boolean) => {
+      menu.hidden = !open;
+      menu.classList.toggle('is-open', open);
+      bar.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.querySelector('.sr-only')!.textContent = open ? 'Close menu' : 'Open menu';
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+      if (open) menu.querySelector('a')?.focus();
+    };
+
+    btn.addEventListener('click', () => setOpen(menu.hidden));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) { setOpen(false); btn.focus(); }
+    });
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+  }
+
+  initMenu();
+  document.addEventListener('astro:after-swap', initMenu);
+</script>
