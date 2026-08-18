@@ -10,27 +10,66 @@ permissions:
   pages: write
   id-token: write
 
-# Let a running deploy finish rather than cancelling it mid-publish.
 concurrency:
   group: pages
   cancel-in-progress: false
+
+# GitHub Pages gives one site per repository, so the two design directions
+# cannot each have their own Pages deployment. Instead both are built and
+# merged into a single artifact:
+#
+#   /karinweddings-redesign/          the editorial rebuild (this branch)
+#   /karinweddings-redesign/classic/  the cream direction, from CLASSIC_REF
+#
+# One domain, one deploy, two versions Karin can flip between.
+env:
+  CLASSIC_REF: c79a103
+  CLASSIC_PATH: /karinweddings-redesign/classic/
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # need history to build the classic ref
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      # Astro's image cache is 43MB and the whole reason a cold build takes
+      # ~5 minutes. Two builds without it would be ten.
+      - name: Restore image cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.astro
+            .classic/node_modules/.astro
+          key: astro-images-${{ hashFiles('src/assets/**') }}
+          restore-keys: astro-images-
 
-      # base is set in astro.config.mjs to /weddinglakebled-redesign/, which
-      # matches the Pages project path. Nothing to pass here.
-      - run: npm run build
+      - run: npm ci
+      - name: Build current
+        run: npm run build
+
+      - name: Build classic
+        run: |
+          git worktree add .classic "$CLASSIC_REF"
+          cd .classic
+          npm ci
+          BASE_PATH="$CLASSIC_PATH" npm run build
+          cd ..
+          mkdir -p dist/classic
+          cp -R .classic/dist/. dist/classic/
+
+      - name: Verify both are present
+        run: |
+          test -f dist/index.html || { echo "current build missing"; exit 1; }
+          test -f dist/classic/index.html || { echo "classic build missing"; exit 1; }
+          echo "current: $(find dist -maxdepth 2 -name index.html | grep -vc classic) pages"
+          echo "classic: $(find dist/classic -name index.html | wc -l) pages"
 
       - uses: actions/upload-pages-artifact@v3
         with:
